@@ -66,6 +66,20 @@ def generate_date_keyboard(start_date, context):
         keyboard.append([InlineKeyboardButton("Вперед", callback_data="forward")])
 
     return InlineKeyboardMarkup(keyboard)
+async def my_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
+    date = context.user_data.get("selected_date", "📅 Не выбрано")
+    time = context.user_data.get("selected_time", "⏰ Не выбрано")
+
+    message = f"🔹 Ваша запись:\n- Лодка: {boat}\n- Дата: {date}\n- Время: {time}"
+    
+    keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(message, reply_markup=reply_markup)
 
 # Функция для обработки текстовых сообщений и callback-запросов
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -168,6 +182,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
         elif data == "back_to_start":
             keyboard = [
+                [InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")],
                 [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
                 [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
                 [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
@@ -245,3 +260,4 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Экспортируем обработчик callback-запросов
 callback_handler = CallbackQueryHandler(handle_message)
+callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
