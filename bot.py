@@ -30,11 +30,12 @@ async def main():
         print("Бот запущен...")
         await application.initialize()
         await application.start()
+        '''
         await application.updater.start_webhook(
             listen="0.0.0.0",  # Слушаем все входящие подключения
             port=8080,         # Порт, указанный в railway.yml
             url_path="/webhook"  # Путь для вебхука
-        )
+        )'''
         print("Бот работает. Нажмите Ctrl+C для завершения.")
         while True:
             await asyncio.sleep(1)
