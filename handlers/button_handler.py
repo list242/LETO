@@ -181,14 +181,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 )
         elif data == "back_to_start":
-            keyboard = [
-                [InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")],
-                [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
-                [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-                [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
-            ]
+            keyboard = []
+
+            # Если у пользователя уже есть запись, добавляем кнопку "Моя запись"
+            if "selected_boat" in context.user_data and "selected_date" in context.user_data:
+                keyboard.append([InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")])
+
+            keyboard.append([InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")])
+            keyboard.append([InlineKeyboardButton("ℹ️ Помощь", callback_data="help")])
+            keyboard.append([InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")])
+
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
+
+            await query.edit_message_text(
+                "👋 Добро пожаловать! Выберите один из пунктов ниже:", 
+                reply_markup=get_main_menu(context)
+            )
 
         # Обработка кнопки "Вперед"
         elif data == "forward":
