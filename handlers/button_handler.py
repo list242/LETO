@@ -3,6 +3,12 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 from datetime import datetime, timedelta
 import calendar
+from telegram.ext import ConversationHandler
+from telegram.ext import MessageHandler
+from telegram.ext import filters
+
+# Определяем состояния
+SELECTING_TIME, ENTERING_NAME, ENTERING_PHONE = range(3)
 ADMIN_FILE = "admins.json"
 # Максимальная дата для выбора
 def load_admins():
@@ -182,7 +188,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"Вы выбрали дату {selected_date}. Теперь выберите время:",
                 reply_markup=reply_markup
             )
-
+        elif data.startswith("time-"):
+            selected_time = data.replace("time-", "", 1)  # Извлекаем выбранное время
+            context.user_data["selected_time"] = selected_time  # Сохраняем его в контексте
+            await query.edit_message_text("Введите ваше имя:")  # Запрашиваем имя
+            return ENTERING_NAME  # Переходим к следующему состоянию
         # Обработка кнопки "Назад"
         elif data == "back":
             # Получаем дату начала текущей недели из контекста
@@ -452,7 +462,60 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 print(f"Ошибка при уведомлении пользователя об отклонении переноса: {e}")
 
+async def enter_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_name = update.message.text.strip()  # Получаем имя пользователя
+    if not user_name:  # Проверка на пустой ввод
+        await update.message.reply_text("Имя не может быть пустым. Пожалуйста, введите ваше имя:")
+        return ENTERING_NAME  # Остаемся в состоянии ввода имени
+    context.user_data["user_name"] = user_name  # Сохраняем имя в контексте
+    await update.message.reply_text("Введите ваш номер телефона:")  # Запрашиваем номер телефона
+    return ENTERING_PHONE  # Переходим к следующему состоянию
+async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    phone_number = update.message.text.strip()  # Получаем номер телефона
+    # Простая проверка формата (например, только цифры и минимальная длина)
+    if not phone_number.isdigit() or len(phone_number) < 5:
+        await update.message.reply_text("Некорректный номер телефона. Пожалуйста, введите корректный номер:")
+        return ENTERING_PHONE  # Остаемся в состоянии ввода телефона
 
+    context.user_data["phone_number"] = phone_number  # Сохраняем номер телефона в контексте
+
+    # Формируем сообщение с подтверждением бронирования
+    boat = context.user_data.get("selected_boat", "Не выбрано")
+    date = context.user_data.get("selected_date", "Не выбрано")
+    time = context.user_data.get("selected_time", "Не выбрано")
+    name = context.user_data.get("user_name", "Не указано")
+    phone = context.user_data.get("phone_number", "Не указано")
+
+    confirmation_message = (
+        f"📌 Ваша запись:\n"
+        f"- Лодка: {boat}\n"
+        f"- Дата: {date}\n"
+        f"- Время: {time}\n"
+        f"- Имя: {name}\n"
+        f"- Телефон: {phone}\n"
+        f"Спасибо за бронирование!"
+    )
+
+    # Кнопка для возврата в меню
+    keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Отправляем сообщение с подтверждением
+    await update.message.reply_text(confirmation_message, reply_markup=reply_markup)
+
+    return ConversationHandler.END  # Завершаем диалог
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Процесс бронирования отменён.")
+    return ConversationHandler.END  # Завершаем диалог
+conv_handler = ConversationHandler(
+    entry_points=[CallbackQueryHandler(handle_message)],  # Точка входа: обработка callback-запросов
+    states={
+        SELECTING_TIME: [CallbackQueryHandler(handle_message)],  # Обработка выбора времени
+        ENTERING_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],  # Обработка ввода имени
+        ENTERING_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_phone)],  # Обработка ввода телефона
+    },
+    fallbacks=[CommandHandler("cancel", cancel)],  # Обработчик отмены (если нужен)
+)
 # Экспортируем обработчик callback-запросов
 callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")

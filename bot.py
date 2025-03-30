@@ -3,6 +3,8 @@ from handlers.menu_handlers import start_handler, faq_handler, help_handler, bac
 from handlers.button_handler import callback_handler
 from handlers.boat_handler import boat_handler
 from handlers.button_handler import register_admin
+from handlers.button_handler import conv_handler
+from handlers.button_handler import conv_handler, cancel
 # Основная функция для запуска бота
 async def main():
     try:
@@ -22,6 +24,7 @@ async def main():
         application.add_handler(help_handler)
         application.add_handler(back_handler)
         application.add_handler(CommandHandler("register", register_admin))
+        application.add_handler(conv_handler) 
         
         # Запускаем бота
         print("Бот запущен...")
