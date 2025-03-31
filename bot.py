@@ -1,7 +1,7 @@
 from telegram.ext import ApplicationBuilder, CommandHandler
-from handlers.menu_handlers import start_handler, faq_handler, help_handler, back_handler
+from handlers.button_handler import start_handler, faq_handler, help_handler, back_handler
 from handlers.button_handler import callback_handler
-from handlers.boat_handler import boat_handler
+from handlers.button_handler import boat_handler
 from handlers.button_handler import register_admin
 from handlers.button_handler import conv_handler
 from handlers.button_handler import conv_handler, cancel

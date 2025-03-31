@@ -3,14 +3,19 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 from datetime import datetime, timedelta
 import calendar
+# boat_handler.py
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler, ContextTypes
+from telegram import Update
+
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import filters
-
-# Определяем состояния
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes
 SELECTING_TIME, ENTERING_NAME, ENTERING_PHONE = range(3)
 ADMIN_FILE = "admins.json"
-# Максимальная дата для выбора
+
 def load_admins():
     try:
         with open(ADMIN_FILE, "r", encoding="utf-8") as file:
@@ -18,73 +23,74 @@ def load_admins():
     except FileNotFoundError:
         return set()
 
-# Функция для сохранения chat_id администраторов в файл
 def save_admins(admin_chat_ids):
     with open(ADMIN_FILE, "w", encoding="utf-8") as file:
         json.dump(list(admin_chat_ids), file, ensure_ascii=False, indent=4)
 
-# Глобальная переменная для хранения chat_id администраторов
 admin_chat_ids = load_admins()
-
 MAX_DATE = datetime(2025, 8, 31).date()
-# Словарь для хранения chat_id администраторов
 admin_chat_ids = set()
-# Русские аббревиатуры дней недели
 RUSSIAN_DAY_ABBREVIATIONS = {0: "Пн",1: "Вт",2: "Ср",3: "Чт",4: "Пт",5: "Сб",6: "Вс"}
 
-# Функция для форматирования даты в нужном формате
 def format_date(date):
-    day_name = RUSSIAN_DAY_ABBREVIATIONS[date.weekday()]  # Например, "Пн", "Вт", "Ср"
+    day_name = RUSSIAN_DAY_ABBREVIATIONS[date.weekday()]  
     return f"{date.strftime('%d.%m.%Y')} ({day_name})"
 
-# Функция для генерации клавиатуры с датами
 def generate_date_keyboard(start_date, context):
     keyboard = []
-    current_date = start_date + timedelta(days=1)  # Начинаем с завтрашнего дня
+    current_date = start_date + timedelta(days=1) 
     days_shown = 0
 
-    # Для текущей недели: отображаем дни до конца недели (включая воскресенье)
     if start_date == datetime.now().date():
         while days_shown < 7 and current_date.weekday() != calendar.SUNDAY and current_date <= MAX_DATE:
-            date_str = format_date(current_date)  # Отображаемый текст: DD.MM.YYYY (день недели)
-            callback_data = f"date-{current_date.isoformat()}"  # Callback-данные: YYYY-MM-DD
+            date_str = format_date(current_date)  
+            callback_data = f"date-{current_date.isoformat()}"  
             keyboard.append([InlineKeyboardButton(date_str, callback_data=callback_data)])
             current_date += timedelta(days=1)
             days_shown += 1
 
-        # Добавляем воскресенье
         if current_date.weekday() == calendar.SUNDAY and current_date <= MAX_DATE:
-            date_str = format_date(current_date)  # Отображаемый текст: DD.MM.YYYY (день недели)
-            callback_data = f"date-{current_date.isoformat()}"  # Callback-данные: YYYY-MM-DD
+            date_str = format_date(current_date) 
+            callback_data = f"date-{current_date.isoformat()}"  
             keyboard.append([InlineKeyboardButton(date_str, callback_data=callback_data)])
 
-    # Для следующих недель: отображаем полные 7 дней или до MAX_DATE
     else:
-        # Убедимся, что текущая дата является понедельником
-        if current_date.weekday() != 0:  # Если не понедельник, перейти к следующему понедельнику
+        if current_date.weekday() != 0:
             days_until_monday = (7 - current_date.weekday()) % 7
             current_date += timedelta(days=days_until_monday)
 
         for _ in range(7):
             if current_date > MAX_DATE:
-                break  # Прекращаем добавление дат, если достигнута максимальная дата
-            date_str = format_date(current_date)  # Отображаемый текст: DD.MM.YYYY (день недели)
-            callback_data = f"date-{current_date.isoformat()}"  # Callback-данные: YYYY-MM-DD
+                break 
+            date_str = format_date(current_date)  
+            callback_data = f"date-{current_date.isoformat()}" 
             keyboard.append([InlineKeyboardButton(date_str, callback_data=callback_data)])
             current_date += timedelta(days=1)
 
-    # Если достигнута максимальная дата, кнопка "Вперед" не добавляется
     if current_date > MAX_DATE:
         keyboard.append([InlineKeyboardButton("Назад", callback_data="back")])
     else:
         keyboard.append([InlineKeyboardButton("Назад", callback_data="back")])
         keyboard.append([InlineKeyboardButton("Вперед", callback_data="forward")])
     return InlineKeyboardMarkup(keyboard)
+
 async def start(update: Update, context):
     user_name = update.message.from_user.first_name
     await update.message.reply_text(f"Привет, {user_name}! Я бот для бронирования лодок.")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+        [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+        [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if update.message:
+        await update.message.reply_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
+    elif update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        await query.edit_message_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
 
-# Обработчик команды /register для регистрации администраторов
 async def register_admin(update: Update, context):
     chat_id = update.message.chat_id
     if chat_id in admin_chat_ids:
@@ -104,7 +110,6 @@ async def notify_admin(context, message, user_chat_id):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-
             await context.bot.send_message(chat_id=admin_chat_id, text=message, reply_markup=reply_markup)
             print(f"Уведомление отправлено администратору с chat_id: {admin_chat_id}")
         except Exception as e:
@@ -113,28 +118,21 @@ async def notify_admin(context, message, user_chat_id):
 async def my_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
     date = context.user_data.get("selected_date", "📅 Не выбрано")
     time = context.user_data.get("selected_time", "⏰ Не выбрано")
-
     message = f"🔹 Ваша запись:\n- Лодка: {boat}\n- Дата: {date}\n- Время: {time}"
-    
     keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
     await query.edit_message_text(message, reply_markup=reply_markup)
 
-# Функция для обработки текстовых сообщений и callback-запросов
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
 
-    # Если это callback (нажатие на кнопку)
     if query:
-        await query.answer()  # Подтверждаем получение callback
+        await query.answer() 
         data = query.data
 
-        # Проверяем, какую лодку выбрал пользователь
         if data in ["blue", "red", "white"]:
             selected_boat = {
                 "blue": "Синяя",
@@ -143,32 +141,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }[data]
             context.user_data["selected_boat"] = selected_boat
 
-            # Сохраняем дату начала текущей недели
             today = datetime.now().date()
             context.user_data["current_week_start"] = today
 
-            # Генерируем клавиатуру с датами
             keyboard = generate_date_keyboard(today, context)
             reply_markup = keyboard
 
-            # Обновляем сообщение с кнопками
             await query.edit_message_text(
                 f"Вы выбрали лодку {selected_boat}. Теперь выберите дату:",
                 reply_markup=reply_markup
             )
 
-        # Проверяем, какую дату выбрал пользователь
         elif data.startswith("date-"):
             selected_date = data.replace("date-", "", 1)
-            # Проверяем, что дата является строкой в формате ISO (YYYY-MM-DD)
             try:
-                datetime.fromisoformat(selected_date)  # Проверка формата
+                datetime.fromisoformat(selected_date) 
                 context.user_data["selected_date"] = selected_date
             except ValueError:
                 await query.edit_message_text("Некорректный формат даты. Пожалуйста, попробуйте снова.")
                 return
 
-            # Создаём кнопки со временными слотами
             time_slots = [
                 "11:00 - 12:30",
                 "13:00 - 14:30",
@@ -183,17 +175,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard.append([InlineKeyboardButton("🔙 Назад", callback_data="back")])
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            # Обновляем сообщение с временными слотами
             await query.edit_message_text(
                 f"Вы выбрали дату {selected_date}. Теперь выберите время:",
                 reply_markup=reply_markup
             )
         elif data.startswith("time-"):
-            selected_time = data.replace("time-", "", 1)  # Извлекаем выбранное время
-            context.user_data["selected_time"] = selected_time  # Сохраняем его в контексте
-            await query.edit_message_text("Введите ваше имя:")  # Запрашиваем имя
-            return ENTERING_NAME  # Переходим к следующему состоянию
-        # Обработка кнопки "Назад"
+            selected_time = data.replace("time-", "", 1)  
+            context.user_data["selected_time"] = selected_time  
+            await query.edit_message_text("Введите ваше имя:")
+            return ENTERING_NAME 
+
         elif data == "back":
             # Получаем дату начала текущей недели из контекста
             current_week_start = context.user_data.get("current_week_start", datetime.now().date())
@@ -461,31 +452,59 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             except Exception as e:
                 print(f"Ошибка при уведомлении пользователя об отклонении переноса: {e}")
-
+    else:
+        user_input = update.message.text.strip()
+        state = context.user_data.get("state")
+        
+        if state == ENTERING_NAME:
+            await enter_name(update, context)
+        elif state == ENTERING_PHONE:
+            await enter_phone(update, context)
+        else:
+            # Если пользователь не находится в диалоге, игнорируем сообщение
+            pass
 async def enter_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.message.text.strip()  # Получаем имя пользователя
-    if not user_name:  # Проверка на пустой ввод
-        await update.message.reply_text("Имя не может быть пустым. Пожалуйста, введите ваше имя:")
-        return ENTERING_NAME  # Остаемся в состоянии ввода имени
-    context.user_data["user_name"] = user_name  # Сохраняем имя в контексте
-    await update.message.reply_text("Введите ваш номер телефона:")  # Запрашиваем номер телефона
-    return ENTERING_PHONE  # Переходим к следующему состоянию
+    user_input = update.message.text.strip()
+    
+    if not user_input or len(user_input) < 2:
+        await update.message.reply_text("Имя должно содержать минимум 2 символа. Попробуйте снова:")
+        return ENTERING_NAME
+    
+    context.user_data["user_name"] = user_input
+    keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Введите ваш номер телефона:", reply_markup=reply_markup)
+    return ENTERING_PHONE
+
+async def choose_boat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Синяя лодка", callback_data="blue")],
+        [InlineKeyboardButton("Красная лодка", callback_data="red")],
+        [InlineKeyboardButton("Белая лодка", callback_data="white")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if update.message:
+        await update.message.reply_text("Выберите лодку:", reply_markup=reply_markup)
+    elif update.callback_query:
+        query = update.callback_query
+        await query.edit_message_text("Выберите лодку:", reply_markup=reply_markup)
+
 async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    phone_number = update.message.text.strip()  # Получаем номер телефона
-    # Простая проверка формата (например, только цифры и минимальная длина)
-    if not phone_number.isdigit() or len(phone_number) < 5:
-        await update.message.reply_text("Некорректный номер телефона. Пожалуйста, введите корректный номер:")
-        return ENTERING_PHONE  # Остаемся в состоянии ввода телефона
-
-    context.user_data["phone_number"] = phone_number  # Сохраняем номер телефона в контексте
-
-    # Формируем сообщение с подтверждением бронирования
+    user_input = update.message.text.strip()
+    
+    if not user_input.isdigit() or len(user_input) < 7:
+        await update.message.reply_text("Некорректный номер телефона. Введите только цифры, минимум 7 символов:")
+        return ENTERING_PHONE
+    
+    context.user_data["phone_number"] = user_input
+    
+    # Формируем подтверждение брони
     boat = context.user_data.get("selected_boat", "Не выбрано")
     date = context.user_data.get("selected_date", "Не выбрано")
     time = context.user_data.get("selected_time", "Не выбрано")
     name = context.user_data.get("user_name", "Не указано")
     phone = context.user_data.get("phone_number", "Не указано")
-
+    
     confirmation_message = (
         f"📌 Ваша запись:\n"
         f"- Лодка: {boat}\n"
@@ -493,29 +512,84 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"- Время: {time}\n"
         f"- Имя: {name}\n"
         f"- Телефон: {phone}\n"
-        f"Спасибо за бронирование!"
+        f"Всё верно?"
     )
-
-    # Кнопка для возврата в меню
-    keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ Да", callback_data="confirm_booking")],
+        [InlineKeyboardButton("❌ Отмена", callback_data="cancel_final")]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Отправляем сообщение с подтверждением
     await update.message.reply_text(confirmation_message, reply_markup=reply_markup)
+    return ConversationHandler.END
 
+async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    # Возвращаем пользователя в главное меню
+    keyboard = [
+        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+        [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+        [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.edit_message_text(
+        "Вы вернулись в главное меню.",
+        reply_markup=reply_markup
+    )
+    
     return ConversationHandler.END  # Завершаем диалог
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Процесс бронирования отменён.")
     return ConversationHandler.END  # Завершаем диалог
 conv_handler = ConversationHandler(
-    entry_points=[CallbackQueryHandler(handle_message)],  # Точка входа: обработка callback-запросов
+    entry_points=[CallbackQueryHandler(handle_message)],
     states={
-        SELECTING_TIME: [CallbackQueryHandler(handle_message)],  # Обработка выбора времени
-        ENTERING_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],  # Обработка ввода имени
-        ENTERING_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_phone)],  # Обработка ввода телефона
+        SELECTING_TIME: [CallbackQueryHandler(handle_message)],
+        ENTERING_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],
+        ENTERING_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_phone)]
     },
-    fallbacks=[CommandHandler("cancel", cancel)],  # Обработчик отмены (если нужен)
+    fallbacks=[
+        CallbackQueryHandler(handle_back, pattern="^back_to_start$"),
+        CommandHandler("cancel", cancel)
+    ]
 )
+async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(
+        "📌 Частые вопросы:\n"
+        "- 📅 Можно ли перенести бронь?\n"
+        "- ⚓ Какие условия аренды?\n"
+        "- 👶 Есть ли ограничения по возрасту?\n"
+        "🔙 Для возврата в меню нажмите кнопку .",
+        reply_markup=reply_markup
+    )
+
+async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(
+        "❓ Раздел помощи:\n"
+        "1️⃣ Как забронировать лодку?\n"
+        "2️⃣ Какие есть правила пользования лодкой?\n"
+        "3️⃣ Как отменить бронь?\n"
+        "🔙 Для возврата в меню нажмите кнопку ниже.",
+        reply_markup=reply_markup
+    )
 # Экспортируем обработчик callback-запросов
+# Регистрация обработчиков
+start_handler = CommandHandler("start", start)
+faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
+help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
+back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
 callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
+boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
