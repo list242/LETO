@@ -1,8 +1,0 @@
-version: 2
-services:
-  bot:
-    build_command: pip install -r requirements.txt
-    start_command: python bot.py
-    webhooks:
-      - path: /webhook
-        port: 8080

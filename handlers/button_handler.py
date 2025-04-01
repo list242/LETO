@@ -181,7 +181,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         elif data.startswith("time-"):
             selected_time = data.replace("time-", "", 1)  
-            context.user_data["selected_time"] = selected_time  
+            context.user_data["selected_time"] = selected_time
+            context.user_data["state"] = ENTERING_NAME
             await query.edit_message_text("Введите ваше имя:")
             return ENTERING_NAME 
 
@@ -352,7 +353,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # Сохраняем выбранное время
             context.user_data["selected_time"] = selected_time
-
             keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -363,6 +363,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"- Время: {selected_time}",
                 reply_markup=reply_markup
             )
+
         elif data.startswith("approve-"):
             user_chat_id = int(data.split("-")[1])
 
@@ -465,12 +466,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 async def enter_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text.strip()
-    
     if not user_input or len(user_input) < 2:
         await update.message.reply_text("Имя должно содержать минимум 2 символа. Попробуйте снова:")
         return ENTERING_NAME
-    
     context.user_data["user_name"] = user_input
+    context.user_data["state"] = ENTERING_PHONE  # Явно устанавливаем состояние
     keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Введите ваш номер телефона:", reply_markup=reply_markup)
@@ -497,7 +497,7 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ENTERING_PHONE
     
     context.user_data["phone_number"] = user_input
-    
+    context.user_data.pop("state", None)
     # Формируем подтверждение брони
     boat = context.user_data.get("selected_boat", "Не выбрано")
     date = context.user_data.get("selected_date", "Не выбрано")
