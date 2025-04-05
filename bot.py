@@ -1,10 +1,11 @@
 from telegram.ext import ApplicationBuilder, CommandHandler
-from handlers.button_handler import start_handler, faq_handler, help_handler, back_handler
-from handlers.button_handler import callback_handler
-from handlers.button_handler import boat_handler
-from handlers.button_handler import register_admin
-from handlers.button_handler import conv_handler, cancel
+from handlers.button_handler import (
+    start_handler, approve_handler, faq_handler, help_handler, back_handler,
+    callback_handler, boat_handler, register_admin, conv_handler, cancel
+)
+from handlers.utils import load_admins  # Импортируем функцию для загрузки администраторов
 import asyncio
+
 
 # Основная функция для запуска бота
 async def main():
@@ -33,6 +34,7 @@ async def main():
         application.add_handler(back_handler)
         application.add_handler(CommandHandler("register", register_admin))
         application.add_handler(conv_handler)
+        application.add_handler(approve_handler)
 
         # Запускаем бота
         print("Бот запущен...")
