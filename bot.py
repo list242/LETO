@@ -1,23 +1,21 @@
-from telegram.ext import Application, CommandHandler,ApplicationBuilder
+import os
+from telegram.ext import Application, CommandHandler
 from telegram import Update
 from telegram.ext import ContextTypes
 from aiohttp import web
-import os
 from handlers.button_handler import (
     start_handler, approve_handler, faq_handler, help_handler, back_handler,
     callback_handler, boat_handler, register_admin, conv_handler, cancel
 )
-from handlers.utils import load_admins  # Импортируем функцию для загрузки администраторов
-import asyncio
+from handlers.utils import load_admins
 
-# === Telegram ===
+# === Telegram Setup ===
 TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 application = Application.builder().token(TOKEN).build()
-# === Telegram handler ===
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Бот запущен и готов к работе!")
 
-application.add_handler(CommandHandler("start", start))
+# === Обработчики ===
+application.add_handler(CommandHandler("start", start_handler.callback))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(callback_handler)
@@ -33,19 +31,19 @@ async def yclients_webhook(request):
     try:
         data = await request.json()
         print("📩 Webhook от Yclients:", data)
-        # Тут можно что-то делать: логировать, слать уведомление, сохранять и т.д.
         return web.json_response({"status": "ok"})
     except Exception as e:
         print("❌ Ошибка при обработке webhook:", e)
         return web.json_response({"error": str(e)}, status=500)
 
-# === Aiohttp web server setup ===
+# === Aiohttp Server ===
 app = web.Application()
 app.router.add_post("/yclients-webhook", yclients_webhook)
 
 async def on_startup(app):
     await application.initialize()
-    await application.start()
+    print(f"🌍 Устанавливаем Webhook: {WEBHOOK_URL}/telegram")
+    await application.bot.set_webhook(url=f"{WEBHOOK_URL}/telegram")
     print("✅ Telegram-бот запущен на Railway!")
 
 async def on_cleanup(app):
@@ -58,3 +56,11 @@ app.on_cleanup.append(on_cleanup)
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     web.run_app(app, port=port)
+else:
+    # Используется в проде (Railway)
+    async def main():
+        await application.run_webhook(
+            listen="0.0.0.0",
+            port=int(os.getenv("PORT", 8000)),
+            webhook_url=f"{WEBHOOK_URL}/telegram"
+        )
