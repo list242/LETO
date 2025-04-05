@@ -13,9 +13,11 @@ import asyncio
 # === Telegram ===
 TOKEN = os.getenv("BOT_TOKEN")
 application = Application.builder().token(TOKEN).build()
+# === Telegram handler ===
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 Бот запущен и готов к работе!")
 
-
-
+application.add_handler(CommandHandler("start", start))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(callback_handler)
