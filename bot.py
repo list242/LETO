@@ -24,11 +24,11 @@ application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(approve_handler)
 
-# === Запуск через встроенный run_webhook ===
+# === Запуск через встроенный run_webhook с правильным webhook_path ===
 if __name__ == '__main__':
     application.run_webhook(
         listen="0.0.0.0",
         port=PORT,
-        webhook_url=f"{WEBHOOK_URL}/telegram"
+        webhook_url=f"{WEBHOOK_URL}/telegram",
         webhook_path="/telegram"
     )
