@@ -28,5 +28,6 @@ if __name__ == '__main__':
     application.run_webhook(
         listen="0.0.0.0",
         port=int(os.getenv("PORT", 8000)),
-        webhook_url=f"{WEBHOOK_URL}/telegram"
+        webhook_url=f"{WEBHOOK_URL}/"
+
     )
