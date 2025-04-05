@@ -1,7 +1,5 @@
 import os
 from telegram.ext import Application, CommandHandler
-from telegram import Update
-from telegram.ext import ContextTypes
 from handlers.button_handler import (
     start_handler, approve_handler, faq_handler, help_handler, back_handler,
     callback_handler, boat_handler, register_admin, conv_handler, cancel
@@ -15,7 +13,6 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 application = Application.builder().token(TOKEN).build()
 
 # === Обработчики ===
-application.add_handler(CommandHandler("start", start_handler.callback))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(callback_handler)
@@ -26,7 +23,7 @@ application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(approve_handler)
 
-# === Стартуем приложение как webhook ===
+# === Стартуем как Webhook ===
 if __name__ == '__main__':
     application.run_webhook(
         listen="0.0.0.0",
