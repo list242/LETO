@@ -14,7 +14,7 @@ import asyncio
 TOKEN = os.getenv("BOT_TOKEN")
 application = Application.builder().token(TOKEN).build()
 
-# === Telegram handler ===
+
 
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
