@@ -1,47 +1,40 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
-API_BASE = "https://api.yclients.com/api/v1"
-
-CLIENT_ID = "18400"
-USER_TOKEN = "c4033acd6cf298f0c854a9e252ce6226"
-
+YCLIENTS_USER_TOKEN = "c4033acd6cf298f0c854a9e252ce6226"
 COMPANY_ID = 1275464
 STAFF_ID = 3811393
 SERVICE_ID = 19053129
 
-headers = {
-    "Authorization": f"Bearer {USER_TOKEN}",
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-}
+def create_yclients_booking(name: str, phone: str, date: str, time: str) -> dict:
 
-def create_booking(name, phone, dt: datetime, comment="Бронь через Telegram"):
+    datetime_start = f"{date}T{time}:00"
+    start_dt = datetime.strptime(datetime_start, "%Y-%m-%dT%H:%M:%S")
+    end_dt = start_dt + timedelta(minutes=90)  # Бронь на 1.5 часа
+
     payload = {
         "staff_id": STAFF_ID,
         "services": [{"id": SERVICE_ID}],
+        "datetime": datetime_start,
+        "seance_length": 90 * 60,
         "client": {
             "name": name,
             "phone": phone
         },
-        "datetime": dt.strftime("%Y-%m-%dT%H:%M:%S"),
-        "comment": comment
+        "send_sms": True
     }
 
-    response = requests.post(
-        f"{API_BASE}/records/{COMPANY_ID}",
-        headers=headers,
-        json=payload
-    )
+    headers = {
+        "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
+        "Content-Type": "application/json"
+    }
 
-    if response.status_code == 200:
-        print("✅ Бронь создана в Yclients:", response.json())
-        return response.json()
+    url = f"https://api.yclients.com/api/v1/records/{COMPANY_ID}"
+    response = requests.post(url, json=payload, headers=headers)
+
+    if response.ok:
+        print("✅ Запись успешно создана")
     else:
-        print("❌ Ошибка при бронировании:", response.status_code, response.text)
-        return None
+        print("❌ Ошибка при создании записи:", response.text)
 
-# Использование в Telegram-боте:
-# from yclients_api import create_booking
-# dt = datetime.fromisoformat("2025-04-10T15:00:00")
-# create_booking("Иван", "+79035551234", dt)
+    return response.json()
