@@ -11,7 +11,7 @@ from handlers.utils import load_admins  # Импортируем функцию 
 import asyncio
 
 # === Telegram ===
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk")
 application = Application.builder().token(TOKEN).build()
 
 
