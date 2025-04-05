@@ -9,6 +9,7 @@ from handlers.utils import load_admins
 # === Telegram Setup ===
 TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+PORT = int(os.getenv("PORT", 8080))
 
 application = Application.builder().token(TOKEN).build()
 
@@ -23,11 +24,10 @@ application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(approve_handler)
 
-# === Стартуем как Webhook ===
+# === Запуск через встроенный run_webhook ===
 if __name__ == '__main__':
     application.run_webhook(
         listen="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        webhook_url=f"{WEBHOOK_URL}/"
-
+        port=PORT,
+        webhook_url=f"{WEBHOOK_URL}/telegram"
     )
