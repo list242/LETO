@@ -31,4 +31,9 @@ application.add_handler(approve_handler)
 
 # === Запуск бота (локально через polling) ===
 if __name__ == '__main__':
-    application.run_polling()
+    application.run_webhook(
+    listen="0.0.0.0",
+    port=8000,
+    webhook_url="https://fastapi-yclients.up.railway.app"
+)
+
