@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from handlers.button_handler import ContextTypes, ConversationHandler  # ✅ Добавили ContextTypes и ConversationHandler
 from datetime import datetime
 import json
-
+import requests
 import os
 ADMIN_FILE = "admins.json"
 MAX_DATE = datetime(2025, 8, 31).date()
@@ -229,3 +229,26 @@ def delete_booking(user_id):
             print(f"🗑️ Бронь пользователя {user_id} удалена.")
     except Exception as e:
         print(f"❌ Ошибка при удалении брони: {e}")
+def create_yclients_booking(data: dict):
+    url = "https://api.yclients.com/api/v1/record"
+    headers = {
+        "Authorization": "Bearer c4033acd6cf298f0c854a9e252ce6226",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "company_id": 1275464,
+        "service_ids": [19053129],  # Прокат лодки
+        "staff_id": 3811393,        # Сотрудник
+        "datetime": f"{data['selected_date']}T{data['start_time']}:00",
+        "client": {
+            "name": data["user_name"],
+            "phone": data["phone_number"]
+        },
+        "comment": f"Лодка: {data['selected_boat']}, Время: {data['selected_time']}"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    print("➡️ Отправка брони в YCLIENTS:", response.status_code, response.text)
+
+    return response.status_code == 200

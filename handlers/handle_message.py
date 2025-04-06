@@ -9,9 +9,10 @@ from handlers.utils import generate_date_keyboard, notify_admin, ENTERING_PHONE,
 from handlers.utils import ENTERING_NAME
 from handlers.utils import save_booking_to_file, delete_booking
 from weather import get_weather_for_date
-from yclients_api import create_booking
+from yclients_api import create_yclients_booking
 from datetime import datetime
-from handlers.utils import create_yclients_booking
+
+
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -358,21 +359,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 # ⬇️ Добавляем вызов Yclients API
                 try:
-                    date_str = booking_data.get('selected_date')
-                    time_raw = booking_data.get('selected_time')
+                    date_str = booking_data.get("selected_date")
+                    time_raw = booking_data.get("selected_time")
+
                     if not date_str or not time_raw:
                         raise ValueError("Не хватает даты или времени для создания брони")
 
-                    # Извлекаем начальное время
-                    booking_data["start_time"] = time_raw.split(" - ")[0]
+                    start_time = time_raw.split(" - ")[0]
 
                     # Отправляем в YCLIENTS
-                    success = create_yclients_booking(booking_data)
+                    success = create_yclients_booking(
+                        name=booking_data["user_name"],
+                        phone=booking_data["phone_number"],
+                        date=date_str,
+                        time=start_time
+                    )
+
                     if not success:
                         print("❌ Ошибка при бронировании через YCLIENTS API")
 
                 except Exception as api_error:
                     print("⚠️ Ошибка при вызове Yclients API:", api_error)
+
 
 
 
