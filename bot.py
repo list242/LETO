@@ -1,14 +1,22 @@
-import os
-from telegram.ext import Application, CommandHandler
+from telegram.ext import CommandHandler
 from handlers.button_handler import (
     start_handler, approve_handler, faq_handler, help_handler, back_handler,
     callback_handler, boat_handler, register_admin, conv_handler, cancel
 )
 from handlers.utils import load_admins
 
-# === Telegram Setup ===
+import os
+
 TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    raise ValueError("❌ BOT_TOKEN не найден")
+
+from telegram.ext import Application
+
 application = Application.builder().token(TOKEN).build()
+
+
 
 # === Обработчики ===
 application.add_handler(start_handler)
