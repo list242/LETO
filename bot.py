@@ -5,7 +5,7 @@ from handlers.button_handler import (
     callback_handler, boat_handler, register_admin, conv_handler, cancel
 )
 from handlers.utils import load_admins
-
+BOT_TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 # === Telegram Setup ===
 TOKEN = os.getenv("BOT_TOKEN")
 application = Application.builder().token(TOKEN).build()
