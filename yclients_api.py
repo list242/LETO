@@ -28,7 +28,7 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str) -> bool
     headers = {
         "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
         "Partner-Token": PARTNER_TOKEN,
-        "X-Partner-Id": "8463",  # обязательный хак
+        "X-Partner-Id": "b7620716-df47-4fef-922b-99a18fe9e9f4",  # обязательный хак
         "Content-Type": "application/json",
         "Accept": "application/vnd.yclients.v2+json",
         "User-Agent": "bot_boats"
