@@ -1,8 +1,8 @@
 # bot.py
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler
 from handlers.button_handler import (
     start_handler, approve_handler, faq_handler, help_handler, back_handler,
-    callback_handler, boat_handler, register_admin, conv_handler, cancel
+    callback_handler, boat_handler, register_admin, conv_handler, cancel, start_quiz, handle_quiz_answer
 )
 import os
 
@@ -22,3 +22,5 @@ application.add_handler(back_handler)
 application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(approve_handler)
+application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
+application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
