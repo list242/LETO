@@ -1,22 +1,19 @@
+# webhook_server.py
 from fastapi import FastAPI, Request
+from bot import application
+import telegram
 
 app = FastAPI()
 
-@app.get("/ping")
-def ping():
-    return {"message": "pong"}
+@app.on_event("startup")
+async def setup_webhook():
+    webhook_url = "https://leto-app.up.railway.app/webhook"
+    await application.bot.set_webhook(webhook_url)
+    print(f"🚀 Webhook установлен: {webhook_url}")
 
-@app.get("/token")
-async def capture_token(request: Request):
-    user_token = request.query_params.get("user_token")
-    if user_token:
-        print(f"✅ Новый системный User Token: {user_token}")
-        with open("yclients_token.txt", "w") as f:
-            f.write(user_token)
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    update = telegram.Update.de_json(data, application.bot)
+    await application.process_update(update)
     return {"status": "ok"}
-
-@app.post("/disconnect")
-async def disconnect_hook(request: Request):
-    body = await request.body()
-    print("🔌 Интеграция отключена. Payload:", body)
-    return {"status": "received"}
