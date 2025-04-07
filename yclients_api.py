@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 
-YCLIENTS_USER_TOKEN = "c4033acd6cf298f0c854a9e252ce6226"
+YCLIENTS_USER_TOKEN = "eebe5959-8779-4670-a3a0-ab3a536f649d"
 PARTNER_TOKEN = "tdp3ectpmhn5xkghbwns"
 COMPANY_ID = 1275464
 STAFF_ID = 3811393
