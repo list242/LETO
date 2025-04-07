@@ -5,11 +5,14 @@ import telegram
 
 app = FastAPI()
 
+import os
+
 @app.on_event("startup")
 async def setup_webhook():
-    webhook_url = "https://leto-app.up.railway.app/webhook"
+    webhook_url = "https://leto-production.up.railway.app/webhook"
     await application.bot.set_webhook(webhook_url)
     print(f"🚀 Webhook установлен: {webhook_url}")
+
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
