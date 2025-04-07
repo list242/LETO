@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timedelta
 
 YCLIENTS_USER_TOKEN = "eebe5959-8779-4670-a3a0-ab3a536f649d"
-PARTNER_TOKEN = "tdp3ectpmhn5xkghbwns"
+PARTNER_TOKEN = "b7620716-df47-4fef-922b-99a18fe9e9f4"
 COMPANY_ID = 1275464
 STAFF_ID = 3811393
 SERVICE_ID = 19053129
@@ -28,7 +28,7 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str) -> bool
     headers = {
         "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
         "Partner-Token": PARTNER_TOKEN,
-        "X-Partner-Id": "b7620716-df47-4fef-922b-99a18fe9e9f4",  # обязательный хак
+        "X-Partner-Id": "8463",  # обязательный хак
         "Content-Type": "application/json",
         "Accept": "application/vnd.yclients.v2+json",
         "User-Agent": "bot_boats"
