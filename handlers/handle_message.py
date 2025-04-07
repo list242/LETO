@@ -21,9 +21,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query:
         user_chat_id = update.effective_user.id
 
-        if context.bot_data.get(f"pending-{user_chat_id}"):
-            await query.answer("⏳ Ожидайте подтверждения от администратора.")
-            return
+        #if context.bot_data.get(f"pending-{user_chat_id}"):
+            #await query.answer("⏳ Ожидайте подтверждения от администратора.")
+           # return
         await query.answer() 
         data = query.data
 
