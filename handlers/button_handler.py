@@ -180,62 +180,62 @@ async def approve_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Обновляем сообщение для администратора
     await query.edit_message_text("✅ Заявка одобрена. Пользователь уведомлён.")
-quiz_questions = [
-    ("Когда я хочу повернуть налево:", ["Я кручу руль налево", "Я кручу руль направо", "Нажимаю газ"], 0),
-    ("Когда я хочу повернуть направо:", ["Я кручу руль направо", "Я кручу руль налево", "Даю задний ход"], 0),
-    ("Когда хочу ехать вперёд:", ["Ручку передачи вперёд", "Ручку передачи назад", "Нажимаю тормоз"], 0),
-    ("Когда хочу ехать назад:", ["Ручку передачи назад", "Ручку передачи вперёд", "Нажимаю сигнал"], 0),
-    ("Минимальная дистанция от берега:", ["20 метров", "5 метров", "50 метров"], 0),
-    ("Если возникают вопросы, что делать?", ["Спросить по рации", "Кричать в сторону берега", "Нажать все кнопки"], 0),
-]
+    quiz_questions = [
+        ("Когда я хочу повернуть налево:", ["Я кручу руль налево", "Я кручу руль направо", "Нажимаю газ"], 0),
+        ("Когда я хочу повернуть направо:", ["Я кручу руль направо", "Я кручу руль налево", "Даю задний ход"], 0),
+        ("Когда хочу ехать вперёд:", ["Ручку передачи вперёд", "Ручку передачи назад", "Нажимаю тормоз"], 0),
+        ("Когда хочу ехать назад:", ["Ручку передачи назад", "Ручку передачи вперёд", "Нажимаю сигнал"], 0),
+        ("Минимальная дистанция от берега:", ["20 метров", "5 метров", "50 метров"], 0),
+        ("Если возникают вопросы, что делать?", ["Спросить по рации", "Кричать в сторону берега", "Нажать все кнопки"], 0),
+    ]
 
-async def start_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["quiz_answers"] = []
-    context.user_data["quiz_index"] = 0
-    await send_next_quiz_question(update, context)
+    async def start_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        context.user_data["quiz_answers"] = []
+        context.user_data["quiz_index"] = 0
+        await send_next_quiz_question(update, context)
 
-async def send_next_quiz_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    index = context.user_data["quiz_index"]
-    if index >= len(quiz_questions):
-        return await finish_quiz(update, context)
+    async def send_next_quiz_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        index = context.user_data["quiz_index"]
+        if index >= len(quiz_questions):
+            return await finish_quiz(update, context)
 
-    question, options, _ = quiz_questions[index]
-    keyboard = [[InlineKeyboardButton(opt, callback_data=f"quiz_{index}_{i}")] for i, opt in enumerate(options)]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+        question, options, _ = quiz_questions[index]
+        keyboard = [[InlineKeyboardButton(opt, callback_data=f"quiz_{index}_{i}")] for i, opt in enumerate(options)]
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if update.callback_query:
-        await update.callback_query.edit_message_text(question, reply_markup=reply_markup)
-    else:
-        await update.message.reply_text(question, reply_markup=reply_markup)
+        if update.callback_query:
+            await update.callback_query.edit_message_text(question, reply_markup=reply_markup)
+        else:
+            await update.message.reply_text(question, reply_markup=reply_markup)
 
-async def handle_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = update.callback_query.data
-    _, q_index, selected = data.split("_")
-    q_index, selected = int(q_index), int(selected)
+    async def handle_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        data = update.callback_query.data
+        _, q_index, selected = data.split("_")
+        q_index, selected = int(q_index), int(selected)
 
-    correct_index = quiz_questions[q_index][2]
-    context.user_data["quiz_answers"].append((q_index, selected == correct_index))
-    context.user_data["quiz_index"] += 1
-    await send_next_quiz_question(update, context)
+        correct_index = quiz_questions[q_index][2]
+        context.user_data["quiz_answers"].append((q_index, selected == correct_index))
+        context.user_data["quiz_index"] += 1
+        await send_next_quiz_question(update, context)
 
-async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    results = context.user_data["quiz_answers"]
-    right = sum(1 for _, is_right in results if is_right)
-    wrong = len(results) - right
+    async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        results = context.user_data["quiz_answers"]
+        right = sum(1 for _, is_right in results if is_right)
+        wrong = len(results) - right
 
-    result_text = (
-        f"✅ Правильных ответов: {right}\n"
-        f"❌ Неправильных: {wrong}\n\n"
-    )
+        result_text = (
+            f"✅ Правильных ответов: {right}\n"
+            f"❌ Неправильных: {wrong}\n\n"
+        )
 
-    if wrong == 0:
-        result_text += "🎉 Отлично! Теперь я точно не попаду на бабки!"
-    else:
-        result_text += "📘 Попробуй пройти инструктаж ещё раз, чтобы не попасть на бабки."
+        if wrong == 0:
+            result_text += "🎉 Отлично! Теперь я точно не попаду на бабки!"
+        else:
+            result_text += "📘 Попробуй пройти инструктаж ещё раз, чтобы не попасть на бабки."
 
-    keyboard = [[InlineKeyboardButton("🏠 В меню", callback_data="back_to_start")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.edit_message_text(result_text, reply_markup=reply_markup)
+        keyboard = [[InlineKeyboardButton("🏠 В меню", callback_data="back_to_start")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.callback_query.edit_message_text(result_text, reply_markup=reply_markup)
 
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков

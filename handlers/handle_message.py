@@ -155,6 +155,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 keyboard.append([InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")])
 
+            keyboard.append([InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")])
             keyboard.append([InlineKeyboardButton("ℹ️ Помощь", callback_data="help")])
             keyboard.append([InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")])
 
