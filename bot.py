@@ -6,7 +6,8 @@ from handlers.button_handler import (
 )
 import os
 from handlers.button_handler import start_quiz, handle_quiz_answer
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
+#TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
 
