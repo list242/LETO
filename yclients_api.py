@@ -29,11 +29,12 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_i
         headers = {
             "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
             "Partner-Token": PARTNER_TOKEN,
-            #"X-Partner-Id": PARTNER_ID,
+            "X-Partner-Id": "18400",  # ← попробуй ID твоего приложения
             "Content-Type": "application/json",
             "Accept": "application/vnd.yclients.v2+json",
             "User-Agent": "bot_boats"
         }
+
 
         # Логируем всё, что отправляем
         print("🔍 YCLIENTS: отправка запроса на создание брони")
