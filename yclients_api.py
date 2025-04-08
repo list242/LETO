@@ -4,17 +4,18 @@ from datetime import datetime, timedelta
 import os
 
 # === Конфигурация (можно задавать через переменные среды) ===
-STAFF_LOGIN = os.getenv("STAFF_LOGIN", "+79852482448")
+STAFF_LOGIN = os.getenv("STAFF_LOGIN", "79852482448")
 STAFF_PASSWORD = os.getenv("STAFF_PASSWORD", "MatveyKrutoi228")
 COMPANY_ID = int(os.getenv("COMPANY_ID", "1275464"))
 DEFAULT_STAFF_ID = int(os.getenv("DEFAULT_STAFF_ID", "3813130"))
 SERVICE_ID = int(os.getenv("SERVICE_ID", "19053129"))
-
-def get_user_token(login: str, password: str) -> str:
+USER_TOKEN = int(os.getenv("USER_TOKEN", "c4033acd6cf298f0c854a9e252ce6226"))
+def get_user_token(login: str, password: str, user_token: str) -> str:
     url = "https://api.yclients.com/api/v1/auth"
     payload = {
         "login": "79852482448",
-        "password": "MatveyKrutoi228"
+        "password": "MatveyKrutoi228",
+        "user_token": "c4033acd6cf298f0c854a9e252ce6226"
     }
 
 
