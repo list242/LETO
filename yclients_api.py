@@ -5,10 +5,10 @@ YCLIENTS_USER_TOKEN = "c4033acd6cf298f0c854a9e252ce6226"
 PARTNER_TOKEN = "tdp3ectpmhn5xkghbwns"
 PARTNER_ID = "8463"  # ← если вдруг он у тебя другой — поменяешь
 COMPANY_ID = 1275464
-STAFF_ID = 3811393
+STAFF_ID = 3813130
 SERVICE_ID = 19053129
 
-def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_id: int = 3813130) -> dict:
+def create_yclients_booking(name: str, phone: str, date: str, time: str) -> dict:
     try:
         datetime_start = f"{date}T{time}:00"
         start_dt = datetime.strptime(datetime_start, "%Y-%m-%dT%H:%M:%S")
