@@ -8,14 +8,14 @@ COMPANY_ID = 1275464
 STAFF_ID = 3813130
 SERVICE_ID = 19053129
 
-def create_yclients_booking(name: str, phone: str, date: str, time: str) -> dict:
+def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_id: int = STAFF_ID) -> dict:
     try:
         datetime_start = f"{date}T{time}:00"
         start_dt = datetime.strptime(datetime_start, "%Y-%m-%dT%H:%M:%S")
         end_dt = start_dt + timedelta(minutes=90)
 
         payload = {
-            "staff_id": STAFF_ID,
+            "staff_id": staff_id,
             "services": [{"id": SERVICE_ID}],
             "datetime": datetime_start,
             "seance_length": 90 * 60,
