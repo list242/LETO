@@ -13,9 +13,10 @@ SERVICE_ID = int(os.getenv("SERVICE_ID", "19053129"))
 def get_user_token(login: str, password: str) -> str:
     url = "https://api.yclients.com/api/v1/auth"
     payload = {
-        "login": login,
-        "password": password
+        "login": "79852482448",
+        "password": "MatveyKrutoi228"
     }
+
 
     headers = {
         "Content-Type": "application/json"
