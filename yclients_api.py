@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 
 # === Конфигурация (можно задавать через переменные среды) ===
-STAFF_LOGIN = os.getenv("STAFF_LOGIN", "79852482448")
+STAFF_LOGIN = os.getenv("STAFF_LOGIN", "+79852482448")
 STAFF_PASSWORD = os.getenv("STAFF_PASSWORD", "MatveyKrutoi228")
 COMPANY_ID = int(os.getenv("COMPANY_ID", "1275464"))
 DEFAULT_STAFF_ID = int(os.getenv("DEFAULT_STAFF_ID", "3813130"))
@@ -20,6 +20,8 @@ def get_user_token(login: str, password: str) -> str:
     headers = {
         "Content-Type": "application/json"
     }
+    print("🔍 Логин:", login)
+    print("🔍 Пароль:", "*" * len(password))
 
     try:
         response = requests.post(url, json=payload, headers=headers)
