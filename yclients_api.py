@@ -29,7 +29,7 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_i
         headers = {
             "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
             "Partner-Token": PARTNER_TOKEN,
-            "X-Partner-Id": PARTNER_ID,
+            #"X-Partner-Id": PARTNER_ID,
             "Content-Type": "application/json",
             "Accept": "application/vnd.yclients.v2+json",
             "User-Agent": "bot_boats"
