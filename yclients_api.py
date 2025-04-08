@@ -1,43 +1,53 @@
+
 import requests
 from datetime import datetime, timedelta
+import os
 
-YCLIENTS_USER_TOKEN = "c4033acd6cf298f0c854a9e252ce6226"
-PARTNER_TOKEN = "tdp3ectpmhn5xkghbwns"
-PARTNER_ID = "8463"  # ← если вдруг он у тебя другой — поменяешь
-COMPANY_ID = 1275464
-STAFF_ID = 3813130
-SERVICE_ID = 19053129
+# === Конфигурация (можно задавать через переменные среды) ===
+YCLIENTS_USER_TOKEN = os.getenv("YCLIENTS_USER_TOKEN", "c4033acd6cf298f0c854a9e252ce6226")
+PARTNER_TOKEN = os.getenv("PARTNER_TOKEN", "tdp3ectpmhn5xkghbwns")
+PARTNER_IDS_TO_TRY = [
+    os.getenv("X_PARTNER_ID"),  # в .env или Railway Secrets
+    "8463",  # старый из примера
+    "18400",  # Application ID
+    "1275464",  # ID филиала
+]
+COMPANY_ID = int(os.getenv("COMPANY_ID", "1275464"))
+DEFAULT_STAFF_ID = int(os.getenv("DEFAULT_STAFF_ID", "3813130"))
+SERVICE_ID = int(os.getenv("SERVICE_ID", "19053129"))
 
-def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_id: int = STAFF_ID) -> dict:
-    try:
-        datetime_start = f"{date}T{time}:00"
-        start_dt = datetime.strptime(datetime_start, "%Y-%m-%dT%H:%M:%S")
-        end_dt = start_dt + timedelta(minutes=90)
+def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_id: int = DEFAULT_STAFF_ID) -> dict:
+    datetime_start = f"{date}T{time}:00"
+    start_dt = datetime.strptime(datetime_start, "%Y-%m-%dT%H:%M:%S")
+    end_dt = start_dt + timedelta(minutes=90)
 
-        payload = {
-            "staff_id": staff_id,
-            "services": [{"id": SERVICE_ID}],
-            "datetime": datetime_start,
-            "seance_length": 90 * 60,
-            "client": {
-                "name": name,
-                "phone": phone
-            },
-            "send_sms": True
-        }
+    payload = {
+        "staff_id": staff_id,
+        "services": [{"id": SERVICE_ID}],
+        "datetime": datetime_start,
+        "seance_length": 90 * 60,
+        "client": {
+            "name": name,
+            "phone": phone
+        },
+        "send_sms": True
+    }
+
+    # Попробуем все варианты X-Partner-Id
+    for partner_id in PARTNER_IDS_TO_TRY:
+        if not partner_id:
+            continue
 
         headers = {
             "Authorization": f"Bearer {YCLIENTS_USER_TOKEN}",
             "Partner-Token": PARTNER_TOKEN,
-            "X-Partner-Id": "18400",  # ← попробуй ID твоего приложения
+            "X-Partner-Id": partner_id,
             "Content-Type": "application/json",
             "Accept": "application/vnd.yclients.v2+json",
             "User-Agent": "bot_boats"
         }
 
-
-        # Логируем всё, что отправляем
-        print("🔍 YCLIENTS: отправка запроса на создание брони")
+        print(f"🔁 Попытка с X-Partner-Id = {partner_id}")
         print("➡️ Заголовки:", headers)
         print("📦 Payload:", payload)
 
@@ -46,19 +56,13 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_i
 
         print("📬 Ответ от YCLIENTS:", response.status_code, response.text)
 
-        if response.ok:
+        if response.status_code == 200:
             print("✅ Запись успешно создана:", response.json())
             return response.json()
-        else:
-            print("❌ Ошибка при создании записи:", response.text)
 
-            # Дополнительный разбор, если ошибка связана с партнёрством
-            if "Не указан идентификатор партнера" in response.text:
-                print("⚠️ Похоже, X-Partner-Id некорректен или отсутствует.")
-                print("💡 Убедитесь, что вы используете правильный partner_id, полученный при регистрации приложения.")
-            
-            return {"success": False, "error": response.text}
+        if response.status_code == 401:
+            print("⚠️ Ошибка 401: Unauthorized — возможно, неверный X-Partner-Id.")
+            continue  # пробуем следующий ID
 
-    except Exception as e:
-        print("❌ Исключение при создании брони через YCLIENTS:", str(e))
-        return {"success": False, "error": str(e)}
+    print("❌ Все попытки завершились неудачей.")
+    return {"success": False, "error": "All partner ID attempts failed"}
