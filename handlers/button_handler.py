@@ -7,10 +7,11 @@ import calendar
 #from handlers.utils import generate_date_keyboard, notify_admin, MAX_DATE, enter_name, enter_phone, handle_message
 #from handlers.handle_message import handle_message  # ✅ Больше нет циклического импорта!
 from handlers.handle_message import handle_message
-  # ✅ Правильный импорт
+  # ✅ Правильный импорт 
 from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone 
 SELECTING_TIME = range(3)
 ADMIN_FILE = "admins.json"
+'''
 quiz_questions = [
         ("Когда я хочу повернуть налево:", ["Я кручу руль налево", "Я кручу руль направо", "Нажимаю газ"], 0),
         ("Когда я хочу повернуть направо:", ["Я кручу руль направо", "Я кручу руль налево", "Даю задний ход"], 0),
@@ -19,6 +20,19 @@ quiz_questions = [
         ("Минимальная дистанция от берега:", ["20 метров", "5 метров", "50 метров"], 0),
         ("Если возникают вопросы, что делать?", ["Спросить по рации", "Кричать в сторону берега", "Нажать все кнопки"], 0),
     ]
+'''
+quiz_questions = [
+    {
+        "question": "📍 Нужно ли надевать спасательный жилет?",
+        "options": ["Да", "Нет"],
+        "correct": 0
+    },
+    {
+        "question": "🚫 Можно ли пить алкоголь на лодке?",
+        "options": ["Да", "Нет"],
+        "correct": 1
+    }
+]
 def save_admins(admin_chat_ids):
     with open(ADMIN_FILE, "w", encoding="utf-8") as file:
         json.dump(list(admin_chat_ids), file, ensure_ascii=False, indent=4)
@@ -187,35 +201,56 @@ async def approve_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Обновляем сообщение для администратора
     await query.edit_message_text("✅ Заявка одобрена. Пользователь уведомлён.")
-
 async def start_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["quiz_answers"] = []
-    context.user_data["quiz_index"] = 0
-    await send_next_quiz_question(update, context)
+    query = update.callback_query
+    await query.answer()
+    context.user_data["quiz_step"] = 0
+    await send_quiz_question(update, context)
 
-async def send_next_quiz_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    index = context.user_data["quiz_index"]
-    if index >= len(quiz_questions):
-        return await finish_quiz(update, context)
+async def send_quiz_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    step = context.user_data.get("quiz_step", 0)
+    question_data = quiz_questions[step]
 
-    question, options, _ = quiz_questions[index]
-    keyboard = [[InlineKeyboardButton(opt, callback_data=f"quiz_{index}_{i}")] for i, opt in enumerate(options)]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    buttons = [
+        InlineKeyboardButton(text=opt, callback_data=f"quiz_{step}_{i}")
+        for i, opt in enumerate(question_data["options"])
+    ]
+    keyboard = InlineKeyboardMarkup.from_row(buttons)
 
     if update.callback_query:
-        await update.callback_query.edit_message_text(question, reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(
+            text=question_data["question"],
+            reply_markup=keyboard
+        )
     else:
-        await update.message.reply_text(question, reply_markup=reply_markup)
+        await update.message.reply_text(
+            text=question_data["question"],
+            reply_markup=keyboard
+        )
 
 async def handle_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = update.callback_query.data
-    _, q_index, selected = data.split("_")
-    q_index, selected = int(q_index), int(selected)
+    query = update.callback_query
+    await query.answer()
+    data = query.data  # например "quiz_0_1"
 
-    correct_index = quiz_questions[q_index][2]
-    context.user_data["quiz_answers"].append((q_index, selected == correct_index))
-    context.user_data["quiz_index"] += 1
-    await send_next_quiz_question(update, context)
+    try:
+        _, step_str, answer_str = data.split("_")
+        step = int(step_str)
+        answer = int(answer_str)
+
+        correct_answer = quiz_questions[step]["correct"]
+        if answer == correct_answer:
+            step += 1
+            if step < len(quiz_questions):
+                context.user_data["quiz_step"] = step
+                await send_quiz_question(update, context)
+            else:
+                await query.edit_message_text("🎉 Инструктаж завершён! Вы молодец.")
+        else:
+            await query.edit_message_text("❌ Неправильный ответ. Попробуйте снова.")
+    except Exception as e:
+        print("Ошибка в handle_quiz_answer:", e)
+        await query.edit_message_text("⚠️ Произошла ошибка при обработке ответа.")
 
 async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     results = context.user_data["quiz_answers"]
