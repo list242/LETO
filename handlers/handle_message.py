@@ -370,23 +370,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 booking_data = context.bot_data.get(user_chat_id)
                 if not booking_data:
                     raise ValueError("Нет данных о брони в context.bot_data")
-                existing = get_yclients_bookings(date_str)
-                staff_id = 3813130  # или через staff_map[boat]
-                start_time = f"{date_str}T{start_time}:00"
-
-                already_taken = any(
-                    b.get("staff", {}).get("id") == staff_id and b.get("datetime") == start_time
-                    for b in existing
-                )
-
-                if already_taken:
-                    await context.bot.send_message(
-                        chat_id=user_chat_id,
-                        text="❌ Ошибка: выбранное время уже занято в системе. Пожалуйста, выберите другое время."
-                    )
-                    await query.edit_message_text("❌ Подтверждение отклонено. Время уже занято.")
-                    return
-
                 save_booking_to_file(user_chat_id, booking_data)
 
                 # ⬇️ Добавляем вызов Yclients API
@@ -398,6 +381,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         raise ValueError("Не хватает даты или времени для создания брони")
 
                     start_time = time_raw.split(" - ")[0]
+                    existing = get_yclients_bookings(date_str)
+                    staff_id = 3813130  # или через staff_map[boat]
+                    start_time = f"{date_str}T{start_time}:00"
+
+                    already_taken = any(
+                        b.get("staff", {}).get("id") == staff_id and b.get("datetime") == start_time
+                        for b in existing
+                    )
+
+                    if already_taken:
+                        await context.bot.send_message(
+                            chat_id=user_chat_id,
+                            text="❌ Ошибка: выбранное время уже занято в системе. Пожалуйста, выберите другое время."
+                        )
+                        await query.edit_message_text("❌ Подтверждение отклонено. Время уже занято.")
+                        return
 
                     # Отправляем в YCLIENTS
                     success = create_yclients_booking(
