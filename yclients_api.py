@@ -5,7 +5,7 @@ import os
 import json
 
 # === Конфигурация (можно задавать через переменные среды) ===
-USER_TOKEN = os.getenv("USER_TOKEN", "c4033acd6cf298f0c854a9e252ce6226")
+USER_TOKEN = os.getenv("USER_TOKEN", "eebe5959-8779-4670-a3a0-ab3a536f649d")
 
 PARTNER_IDS_TO_TRY = [
     os.getenv("X_PARTNER_ID"),
