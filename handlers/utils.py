@@ -11,6 +11,22 @@ MAX_DATE = datetime(2025, 8, 31).date()
 ENTERING_NAME, ENTERING_PHONE = range(2)
 RUSSIAN_DAY_ABBREVIATIONS = {0: "Пн",1: "Вт",2: "Ср",3: "Чт",4: "Пт",5: "Сб",6: "Вс"}
 
+def is_slot_taken(date: str, time: str, boat: str) -> bool:
+    if not os.path.exists(BOOKINGS_FILE):
+        return False
+
+    with open(BOOKINGS_FILE, "r", encoding="utf-8") as f:
+        try:
+            bookings = json.load(f)
+        except json.JSONDecodeError:
+            return False
+
+    for booking in bookings.values():
+        if (booking.get("selected_date") == date and
+            booking.get("selected_time") == time and
+            booking.get("selected_boat") == boat):
+            return True
+    return False
 
 def load_admins():
     try:
