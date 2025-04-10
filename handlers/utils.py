@@ -263,5 +263,37 @@ def create_yclients_booking(data: dict):
 
     response = requests.post(url, json=payload, headers=headers)
     print("➡️ Отправка брони в YCLIENTS:", response.status_code, response.text)
+    def get_taken_slots(date: str, boat: str, staff_id: int) -> set:
+        """Объединяет занятые слоты из YCLIENTS и локального файла."""
+        taken = set()
 
+        # Локальные записи (Telegram)
+        if os.path.exists(BOOKINGS_FILE):
+            with open(BOOKINGS_FILE, "r", encoding="utf-8") as f:
+                try:
+                    data = json.load(f)
+                    for b in data.values():
+                        if b.get("selected_date") == date and b.get("selected_boat") == boat:
+                            taken.add(b.get("selected_time"))
+                except Exception as e:
+                    print(f"Ошибка чтения bookings.json: {e}")
+
+        # Записи из YCLIENTS
+        try:
+            external = get_yclients_bookings(date)
+            for record in external:
+                if record.get("staff", {}).get("id") == staff_id:
+                    dt = record.get("datetime")
+                    try:
+                        parsed = datetime.fromisoformat(dt)
+                        hour = parsed.strftime("%H:%M")
+                        end = (parsed + timedelta(minutes=90)).strftime("%H:%M")
+                        slot = f"{hour} - {end}"
+                        taken.add(slot)
+                    except Exception:
+                        continue
+        except Exception as e:
+            print(f"Ошибка получения слотов из YCLIENTS: {e}")
+
+        return taken
     return response.status_code == 200

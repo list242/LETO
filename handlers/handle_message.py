@@ -7,12 +7,12 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.utils import generate_date_keyboard, notify_admin, ENTERING_PHONE, enter_name, enter_phone
 from handlers.utils import ENTERING_NAME
-from handlers.utils import save_booking_to_file, delete_booking
+from handlers.utils import save_booking_to_file, delete_booking, get_taken_slots
 from weather import get_weather_for_date
 from yclients_api import create_yclients_booking
 from datetime import datetime# добавь в начало файла, если ещё нет
 from handlers.utils import is_slot_taken_yclients
-from yclients_api import get_yclients_bookings 
+from yclients_api import get_yclients_bookings, DEFAULT_STAFF_ID
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -78,20 +78,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "19:00 - 20:30",
                 "21:00 - 22:30"
             ]
-            boat = context.user_data.get("selected_boat")
+            staff_map = {
+                "Синяя": 3813130,
+                "Красная": 3811393,
+                "Белая": 3819999
+            }
 
-            available_slots = []
-            staff_id = 3813130
-            for slot in time_slots:
-                if not is_slot_taken_yclients(selected_date, slot, staff_id):
-                    available_slots.append([InlineKeyboardButton(slot, callback_data=f"time-{slot}")])
+            boat = context.user_data.get("selected_boat")
+            staff_id = staff_map.get(boat, DEFAULT_STAFF_ID)
+            taken_slots = get_taken_slots(selected_date, boat, staff_id)
+
+            available_slots = [
+                [InlineKeyboardButton(slot, callback_data=f"time-{slot}")]
+                for slot in time_slots if slot not in taken_slots
+            ]
 
             if not available_slots:
                 available_slots.append([InlineKeyboardButton("❌ Все слоты заняты", callback_data="back")])
 
             available_slots.append([InlineKeyboardButton("🔙 Назад", callback_data="back")])
             reply_markup = InlineKeyboardMarkup(available_slots)
-
 
             await query.edit_message_text(
                 text=weather_text,
