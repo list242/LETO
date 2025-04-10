@@ -12,7 +12,7 @@ from weather import get_weather_for_date
 from yclients_api import create_yclients_booking
 from datetime import datetime# добавь в начало файла, если ещё нет
 from handlers.utils import is_slot_taken_yclients
-
+from yclients_api import get_yclients_bookings 
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -364,7 +364,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 booking_data = context.bot_data.get(user_chat_id)
                 if not booking_data:
                     raise ValueError("Нет данных о брони в context.bot_data")
+                existing = get_yclients_bookings(date_str)
+                staff_id = 3813130  # или через staff_map[boat]
+                start_time = f"{date_str}T{start_time}:00"
 
+                already_taken = any(
+                    b.get("staff", {}).get("id") == staff_id and b.get("datetime") == start_time
+                    for b in existing
+                )
+
+                if already_taken:
+                    await context.bot.send_message(
+                        chat_id=user_chat_id,
+                        text="❌ Ошибка: выбранное время уже занято в системе. Пожалуйста, выберите другое время."
+                    )
+                    await query.edit_message_text("❌ Подтверждение отклонено. Время уже занято.")
+                    return
 
                 save_booking_to_file(user_chat_id, booking_data)
 
