@@ -10,9 +10,8 @@ from handlers.utils import ENTERING_NAME
 from handlers.utils import save_booking_to_file, delete_booking
 from weather import get_weather_for_date
 from yclients_api import create_yclients_booking
-from datetime import datetime
-from handlers.utils import is_slot_taken  # добавь в начало файла, если ещё нет
-
+from datetime import datetime# добавь в начало файла, если ещё нет
+from handlers.utils import is_slot_taken_yclients
 
 
 
@@ -82,8 +81,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             boat = context.user_data.get("selected_boat")
 
             available_slots = []
+            staff_id = 3813130
             for slot in time_slots:
-                if not is_slot_taken(selected_date, slot, boat):
+                if not is_slot_taken_yclients(selected_date, slot, staff_id):
                     available_slots.append([InlineKeyboardButton(slot, callback_data=f"time-{slot}")])
 
             if not available_slots:

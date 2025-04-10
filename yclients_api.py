@@ -67,3 +67,27 @@ def create_yclients_booking(name: str, phone: str, date: str, time: str, staff_i
         print(f"💥 Исключение при запросе: {e}")
 
     return {"success": False, "error": "Не удалось создать запись"}
+def get_yclients_bookings(date: str) -> list:
+    """
+    Получает список записей на конкретную дату из YCLIENTS.
+    Возвращает список словарей с полями: 'datetime', 'staff_id'
+    """
+    headers = {
+        "Authorization": f"Bearer {PARTNER_TOKEN}, User {USER_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.yclients.v2+json",
+        "X-Partner-Id": X_PARTNER_ID
+    }
+
+    url = f"https://api.yclients.com/api/v1/records/{COMPANY_ID}?date={date}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json().get("data", [])
+        else:
+            print("⚠️ Не удалось получить записи:", response.status_code, response.text)
+    except Exception as e:
+        print("💥 Ошибка при запросе записей:", e)
+
+    return []
