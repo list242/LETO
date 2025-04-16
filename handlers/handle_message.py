@@ -85,9 +85,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "21:00 - 22:30"
             ]
             staff_map = {
-                "Синяя": 3813130,
-                "Красная": 3811393,
-                "Белая": 3819999
+                "Синяя": 19177553,
+                "Красная": 19177559,
+                "Белая": 19177302
             }
 
             boat = context.user_data.get("selected_boat")
