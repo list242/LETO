@@ -465,8 +465,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         name=booking_data["user_name"],
                         phone=booking_data["phone_number"],
                         date=date_str,
-                        time=start_time,
-                        staff_id=3813130
+                        boat=boat,
+                        staff_id=19177301
                     )
 
                     if not success:
