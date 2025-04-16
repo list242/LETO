@@ -11,19 +11,25 @@ from handlers.utils import save_booking_to_file, delete_booking, get_taken_slots
 from weather import get_weather_for_date
 from yclients_api import create_yclients_booking
 from datetime import datetime# добавь в начало файла, если ещё нет
-from handlers.utils import is_slot_taken_yclients
+from handlers.utils import is_slot_taken_yclients, load_admins
 from yclients_api import get_yclients_bookings, DEFAULT_STAFF_ID
+from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-
+    
     if query:
         user_chat_id = update.effective_user.id
+        admins = load_admins()
+        if user_chat_id not in admins and any([
+            context.bot_data.get(f"pending-{user_chat_id}"),
+            context.bot_data.get(f"reschedule-{user_chat_id}"),
+            context.bot_data.get(f"cancel-{user_chat_id}")
+        ]):
+            await query.answer("⏳ Ожидайте подтверждения от администратора.")
+            return
 
-        #if context.bot_data.get(f"pending-{user_chat_id}"):
-            #await query.answer("⏳ Ожидайте подтверждения от администратора.")
-           # return
         await query.answer() 
         data = query.data
 
@@ -104,16 +110,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=reply_markup
             )
 
-        elif data.startswith("time-"):
-            selected_time = data.replace("time-", "", 1)  
-            context.user_data["selected_time"] = selected_time
-            context.user_data["state"] = ENTERING_NAME
-
-            keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="back_to_time_selection")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            await query.edit_message_text("Введите ваше имя:", reply_markup=reply_markup)
-            return ENTERING_NAME
 
         elif data == "go_back":
             # Возвращаем пользователя в выбор лодки
@@ -160,10 +156,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
 # Обработка кнопки "Назад" и других кнопок
         elif data == "back_to_start":
+            if context.bot_data.get(f"pending-{user_chat_id}"):
+                await query.answer("⏳ Ожидайте подтверждения от администратора.")
+                return
             keyboard = []
-
             # Если пользователь сделал запись, добавляем кнопку "Моя запись"
-            if "selected_boat" in context.user_data and "selected_date" in context.user_data and "selected_time" in context.user_data:
+            if get_booking(user_chat_id):
                 # Убираем кнопку "Выбор лодки", если есть запись
                 keyboard.append([InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")])
 
@@ -213,6 +211,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 )
         elif data == "my_booking":
+            booking = get_booking(user_chat_id)
+            if not booking:
+                await query.edit_message_text("❌ У вас нет активной записи.")
+                return
             boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
             date = context.user_data.get("selected_date", "📅 Не выбрано")
             time = context.user_data.get("selected_time", "⏰ Не выбрано")
@@ -238,6 +240,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(message, reply_markup=reply_markup)
         # Обработка кнопки "Отмена записи"# Отмена бронирования
         elif data == "cancel_booking":
+            booking = get_booking(user_chat_id)
+            if not booking:
+                await query.edit_message_text("❌ У вас нет активной записи.")
+                return
             boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
             date = context.user_data.get("selected_date", "📅 Не выбрано")
             time = context.user_data.get("selected_time", "⏰ Не выбрано")
@@ -247,21 +253,36 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"⚠️ Пользователь хочет отменить запись:\n"
                 f"- Лодка: {boat}\n"
                 f"- Дата: {date}\n"
-                f"- Время: {time}"
+                f"- Время: {time}\n"
+                f"- Имя: {name}\n"
+                f"- Телефон: {phone}"
             )
+
+            # Удаляем локальную бронь
             delete_booking(user_chat_id)
+
+            # Отправляем уведомление админу
             await notify_admin(context, admin_message, user_chat_id)
 
-            user_message = "❌ Вы запросили отмену записи. Администратор был уведомлен."
-            keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            # Сохраняем состояние отмены
             context.bot_data[f"pending-{user_chat_id}"] = True
             context.bot_data[f"pending_msg_id-{user_chat_id}"] = query.message.message_id
+            context.bot_data[f"cancel-{user_chat_id}"] = True
+            context.bot_data[f"cancel_msg_id-{user_chat_id}"] = query.message.message_id
+
+            user_message = "❌ Вы запросили отмену записи. Администратор свяжется с Вами в ближайшее время."
+            keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
             await query.edit_message_text(user_message, reply_markup=reply_markup)
 
+
         # Перенос бронирования
         elif data == "reschedule_booking":
+            booking = get_booking(user_chat_id)
+            if not booking:
+                await query.edit_message_text("❌ У вас нет активной записи.")
+                return
             boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
             date = context.user_data.get("selected_date", "📅 Не выбрано")
             time = context.user_data.get("selected_time", "⏰ Не выбрано")
@@ -303,7 +324,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Проверяем, какое время выбрал пользователь
         elif data.startswith("time-"):
+            if get_booking(user_chat_id):
+                await query.answer("❗ У вас уже есть активная запись.")
+                return
+
             selected_time = data.replace("time-", "", 1)
+            context.user_data["selected_time"] = selected_time
+            context.user_data["state"] = ENTERING_NAME
+
             boat = context.user_data.get("selected_boat")
             date = context.user_data.get("selected_date")
 
@@ -317,21 +345,56 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.edit_message_text("Некорректный формат даты. Попробуйте снова.")
                 return
 
-            # Сохраняем выбранное время
-            context.user_data["selected_time"] = selected_time
-            keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            await query.edit_message_text(
-                f"Ваш выбор:\n"
+            # Текст с подтверждением и просьбой ввести имя
+            text = (
+                f"📌 Вы выбрали:\n"
                 f"- Лодка: {boat}\n"
                 f"- Дата: {formatted_date}\n"
-                f"- Время: {selected_time}",
-                reply_markup=reply_markup
+                f"- Время: {selected_time}\n\n"
+                f"✍️ Введите ваше имя:"
             )
+
+            await query.edit_message_text(text=text)
+
+            # Сохраняем message_id для дальнейших обновлений
+            context.user_data["booking_message_id"] = query.message.message_id
+
+            return ENTERING_NAME
+
+
         elif data.startswith("approve-"):
             user_chat_id = int(data.split("-")[1])
             is_reschedule = context.bot_data.get(f"reschedule-{user_chat_id}", False)
+            is_cancel = context.bot_data.get(f"cancel-{user_chat_id}", False)
+
+            if is_cancel:
+                delete_booking(user_chat_id)
+                context.bot_data.pop(f"cancel-{user_chat_id}", None)
+
+                message_id = context.bot_data.pop(f"cancel_msg_id-{user_chat_id}", None)
+                keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
+                if message_id:
+                    await context.bot.edit_message_text(
+                        chat_id=user_chat_id,
+                        message_id=message_id,
+                        text="✅ Ваша заявка успешно отменена.",
+                        reply_markup=reply_markup
+                    )
+                else:
+                    await context.bot.send_message(
+                        chat_id=user_chat_id,
+                        text="✅ Ваша заявка успешно отменена.",
+                        reply_markup=reply_markup
+                    )
+                await query.edit_message_text("✅ Отмена подтверждена. Пользователь уведомлён.")
+                context.bot_data.pop(f"pending-{user_chat_id}", None)
+                context.bot_data.pop(f"pending_msg_id-{user_chat_id}", None)
+                context.bot_data.pop(f"cancel-{user_chat_id}", None)
+                context.bot_data.pop(f"cancel_msg_id-{user_chat_id}", None)
+                return
+
             try:
                 if is_reschedule:
                     # Удаляем бронь
@@ -339,9 +402,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     context.bot_data.pop(f"reschedule-{user_chat_id}", None)
 
                     keyboard = [
-                        [InlineKeyboardButton("🚤 Выбрать лодку", callback_data="select_boat")],
                         [InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]
                     ]
+                    # Сброс всех пользовательских данных
+
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message_id = context.bot_data.pop(f"reschedule_msg_id-{user_chat_id}", None)
                     if message_id:
@@ -362,8 +426,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                 "Выберите новую лодку, чтобы создать бронь.",
                             reply_markup=reply_markup
                         )
-                    for key in ["selected_boat", "selected_date", "selected_time", "user_name", "phone_number", "state"]:
-                        context.user_data.pop(key, None)
                     await query.edit_message_text("✅ Перенос подтверждён. Пользователь уведомлён.")
                     return
             
@@ -371,7 +433,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if not booking_data:
                     raise ValueError("Нет данных о брони в context.bot_data")
                 save_booking_to_file(user_chat_id, booking_data)
-
+                context.bot_data.pop(f"pending-{user_chat_id}", None)
                 # ⬇️ Добавляем вызов Yclients API
                 try:
                     date_str = booking_data.get("selected_date")
@@ -413,23 +475,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception as api_error:
                     print("⚠️ Ошибка при вызове Yclients API:", api_error)
 
-
-
-
                 # Подтверждение для пользователя
                 confirmed_text = (
-                    "✅ Ваша бронь подтверждена администратором!\n"
+                    f"📌 Ваша запись:\n"
                     f"- Лодка: {booking_data['selected_boat']}\n"
                     f"- Дата: {booking_data['selected_date']}\n"
                     f"- Время: {booking_data['selected_time']}\n"
                     f"- Имя: {booking_data['user_name']}\n"
-                    f"- 📞 Телефон: {booking_data['phone_number']}"
+                    f"- Телефон: {booking_data['phone_number']}\n"
+                    f"✅ Ваша заявка одобрена администратором!"
                 )
+
 
                 keyboard = [[InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
-                booking_message_id = context.user_data.get("booking_message_id")
+                booking_message_id = context.bot_data.get(f"booking_msg_id-{user_chat_id}")
 
                 try:
                     if booking_message_id:
@@ -447,12 +508,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         )
                 except Exception as e:
                     print(f"❌ Не удалось обновить сообщение: {e}")
-
+                context.bot_data.pop(f"pending-{user_chat_id}", None)
                 await query.edit_message_text("✅ Заявка одобрена. Пользователь уведомлён.")
 
             except Exception as e:
                 print(f"Ошибка при подтверждении и сохранении брони: {e}")
+            context.bot_data.pop(f"pending-{user_chat_id}", None)
 
+            
         elif data.startswith("reject-"):
             user_chat_id = int(data.split("-")[1])
 
@@ -489,6 +552,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"❌ Вы отклонили запрос на перенос. Подтвердите удаление:\n\n{user_info}",
                     reply_markup=reply_markup
                 )
+                    
 
         elif data.startswith("final_approve-"):
             user_chat_id = int(data.split("-")[1])

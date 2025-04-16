@@ -8,31 +8,25 @@ import calendar
 #from handlers.handle_message import handle_message  # ✅ Больше нет циклического импорта!
 from handlers.handle_message import handle_message
   # ✅ Правильный импорт 
-from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone 
+from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
+from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone, get_taken_slots
 SELECTING_TIME = range(3)
 ADMIN_FILE = "admins.json"
-'''
+
 quiz_questions = [
-        ("Когда я хочу повернуть налево:", ["Я кручу руль налево", "Я кручу руль направо", "Нажимаю газ"], 0),
-        ("Когда я хочу повернуть направо:", ["Я кручу руль направо", "Я кручу руль налево", "Даю задний ход"], 0),
-        ("Когда хочу ехать вперёд:", ["Ручку передачи вперёд", "Ручку передачи назад", "Нажимаю тормоз"], 0),
-        ("Когда хочу ехать назад:", ["Ручку передачи назад", "Ручку передачи вперёд", "Нажимаю сигнал"], 0),
-        ("Минимальная дистанция от берега:", ["20 метров", "5 метров", "50 метров"], 0),
-        ("Если возникают вопросы, что делать?", ["Спросить по рации", "Кричать в сторону берега", "Нажать все кнопки"], 0),
-    ]
-'''
-quiz_questions = [
-    {
-        "question": "📍 Нужно ли надевать спасательный жилет?",
-        "options": ["Да", "Нет"],
-        "correct": 0
-    },
-    {
-        "question": "🚫 Можно ли пить алкоголь на лодке?",
-        "options": ["Да", "Нет"],
-        "correct": 1
-    }
+    {"question": "🦺 Нужно ли надевать спасательный жилет перед выходом?", "options": ["Да, я же не рыба", "Нет, я бессмертный"], "correct": 0},
+    {"question": "🍺 Можно ли пить пиво за рулем лодки?", "options": ["Нет, это опасно", "Да, и капитанский ром тоже"], "correct": 0},
+    {"question": "🚤 Если хочешь повернуть направо, куда крутить руль?", "options": ["Направо", "Налево (логика же)"], "correct": 0},
+    {"question": "📵 Когда можно пользоваться телефоном?", "options": ["Когда не управляю", "Всегда, я тиктокер"], "correct": 0},
+    {"question": "💥 Если лодка не заводится?", "options": ["Позвонить администратору", "Пнуть мотор посильнее"], "correct": 0},
+    {"question": "🌊 Сколько минимум метров держаться от берега?", "options": ["20 метров", "2 метра, чтоб всем видно было"], "correct": 0},
+    {"question": "🧒 Можно ли катать детей без жилета?", "options": ["Нет, всегда с жилетом", "Да, пусть закаляются"], "correct": 0},
+    {"question": "🧭 Потерялся. Что делать?", "options": ["Связаться по рации/телефону", "Орать в небо"], "correct": 0},
+    {"question": "⚓ Что делать при сильном ветре и волнах?", "options": ["Вернуться на базу", "Гнать ещё быстрее!"], "correct": 0},
+    {"question": "🧠 Инструктаж нужен для чего?", "options": ["Чтобы не попасть на бабки", "Чтоб было что скинуть друзьям"], "correct": 0}
 ]
+
+
 def save_admins(admin_chat_ids):
     with open(ADMIN_FILE, "w", encoding="utf-8") as file:
         json.dump(list(admin_chat_ids), file, ensure_ascii=False, indent=4)
@@ -50,6 +44,20 @@ async def start(update: Update, context):
     user_name = update.message.from_user.first_name
     await update.message.reply_text(f"Привет, {user_name}! Я бот для бронирования лодок.")
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_chat_id = update.effective_user.id
+    # ❗ Проверка: если есть активный запрос (перенос, отмена, ожидание)
+    admins = load_admins()
+    if user_chat_id not in admins and any([
+        context.bot_data.get(f"pending-{user_chat_id}"),
+        context.bot_data.get(f"reschedule-{user_chat_id}"),
+        context.bot_data.get(f"cancel-{user_chat_id}")
+    ]):
+        if update.message:
+            await update.message.reply_text("⏳ Ожидайте подтверждения от администратора.")
+        elif update.callback_query:
+            await update.callback_query.answer("⏳ Ожидайте подтверждения от администратора.", show_alert=True)
+        return
+
     keyboard = [
     [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
     [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
@@ -97,6 +105,11 @@ async def notify_admin(context: ContextTypes.DEFAULT_TYPE, message: str, user_ch
 
 async def my_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    user_chat_id = update.effective_user.id
+    booking = get_booking(user_chat_id)
+    if not booking:
+        await query.edit_message_text("❌ У вас нет активной записи.")
+        return
     await query.answer()
     boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
     date = context.user_data.get("selected_date", "📅 Не выбрано")
@@ -183,24 +196,6 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔙 Для возврата в меню нажмите кнопку ниже.",
         reply_markup=reply_markup
     )
-async def approve_booking(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    # Получаем ID пользователя, которого подтверждает админ
-    user_chat_id = int(query.data.split("-")[1])
-
-    # Отправляем пользователю сообщение о подтверждении
-    try:
-        await context.bot.send_message(
-            chat_id=user_chat_id,
-            text="✅ Ваша заявка одобрена! Администратор подтвердил бронирование. Ждём вас!"
-        )
-    except Exception as e:
-        print(f"Ошибка при отправке сообщения пользователю {user_chat_id}: {e}")
-
-    # Обновляем сообщение для администратора
-    await query.edit_message_text("✅ Заявка одобрена. Пользователь уведомлён.")
 async def start_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -239,18 +234,44 @@ async def handle_quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
         answer = int(answer_str)
 
         correct_answer = quiz_questions[step]["correct"]
+
+        # Считаем правильные ответы
+        if "quiz_correct" not in context.user_data:
+            context.user_data["quiz_correct"] = 0
         if answer == correct_answer:
-            step += 1
-            if step < len(quiz_questions):
-                context.user_data["quiz_step"] = step
-                await send_quiz_question(update, context)
-            else:
-                await query.edit_message_text("🎉 Инструктаж завершён! Вы молодец.")
+            context.user_data["quiz_correct"] += 1
+
+        step += 1
+        if step < len(quiz_questions):
+            context.user_data["quiz_step"] = step
+            await send_quiz_question(update, context)
         else:
-            await query.edit_message_text("❌ Неправильный ответ. Попробуйте снова.")
+            correct_count = context.user_data["quiz_correct"]
+            total = len(quiz_questions)
+
+            if correct_count >= 8:
+                text = (
+                    f"🎉 Поздравляем! Вы ответили правильно на {correct_count} из {total} вопросов.\n"
+                    "Вы успешно прошли инструктаж! 🚤"
+                )
+            else:
+                text = (
+                    f"⚠️ Вы ответили правильно только на {correct_count} из {total} вопросов.\n"
+                    "Советуем пройти инструктаж ещё раз."
+                )
+
+            keyboard = [
+                [InlineKeyboardButton("🔁 Пройти снова", callback_data="start_quiz")],
+                [InlineKeyboardButton("🏠 В меню", callback_data="back_to_start")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(text, reply_markup=reply_markup)
+            context.user_data.pop("quiz_correct", None)  # сбрасываем после окончания
+
     except Exception as e:
         print("Ошибка в handle_quiz_answer:", e)
         await query.edit_message_text("⚠️ Произошла ошибка при обработке ответа.")
+
 
 async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     results = context.user_data["quiz_answers"]
@@ -270,14 +291,13 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("🏠 В меню", callback_data="back_to_start")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.edit_message_text(result_text, reply_markup=reply_markup)
-
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков
 start_handler = CommandHandler("start", start)
 faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
 help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
-back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
+#back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
 callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
 boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
-approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")
+#approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")

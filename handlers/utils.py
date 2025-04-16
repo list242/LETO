@@ -5,8 +5,11 @@ from handlers.button_handler import ContextTypes, ConversationHandler  # ✅ Д�
 from datetime import datetime
 import json
 import requests
-import os
+import os, asyncio
+import re
 from yclients_api import get_yclients_bookings
+from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
+
 ADMIN_FILE = "admins.json"
 MAX_DATE = datetime(2025, 8, 31).date()
 ENTERING_NAME, ENTERING_PHONE = range(2)
@@ -106,158 +109,135 @@ async def notify_admin(context: ContextTypes.DEFAULT_TYPE, message: str, user_ch
 
 async def enter_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text.strip()
-    
+    user_chat_id = update.effective_user.id
+
     if not user_input or len(user_input) < 2:
         await update.message.reply_text("Имя должно содержать минимум 2 символа. Попробуйте снова:")
         return ENTERING_NAME
 
+    # Удаляем сообщение пользователя
+    await asyncio.sleep(1.5)
+    await update.message.delete()
+
     context.user_data["user_name"] = user_input
-    context.user_data["state"] = ENTERING_PHONE  # Явно устанавливаем состояние
+    context.user_data["state"] = ENTERING_PHONE
 
-    keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Обновляем сообщение бота
+    message_id = context.user_data.get("booking_message_id")
+    boat = context.user_data.get("selected_boat", "Не выбрано")
+    date = context.user_data.get("selected_date", "Не выбрано")
+    time = context.user_data.get("selected_time", "Не выбрано")
 
-    await update.message.reply_text("Введите ваш номер телефона:", reply_markup=reply_markup)
+    text = (
+        f"📌 Вы выбрали:\n"
+        f"- Лодка: {boat}\n"
+        f"- Дата: {date}\n"
+        f"- Время: {time}\n"
+        f"- Имя: {user_input}\n\n"
+        f"📞 Введите ваш номер телефона:"
+    )
+
+    sent = await context.bot.edit_message_text(
+        chat_id=user_chat_id,
+        message_id=message_id,
+        text=text
+    )
+
+    # Обновляем message_id в случае, если Telegram создал новое сообщение
+    context.user_data["booking_message_id"] = sent.message_id
+
     return ENTERING_PHONE
-
-import re
 
 async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text.strip()
     user_chat_id = update.effective_user.id
-    context.bot_data[f"pending-{user_chat_id}"] = True
-    context.bot_data[f"pending_msg_id-{user_chat_id}"] = update.message.message_id
 
-    # Проверяем формат номера телефона
-    phone_pattern = re.compile(r"^\+?\d{10,15}$")  # Допускаем + в начале, 10-15 цифр
+    # Проверка формата номера
+    phone_pattern = re.compile(r"^\+?\d{10,15}$")
     if not phone_pattern.match(user_input):
-        await update.message.reply_text(
-            "Некорректный номер телефона. Введите в формате +79037799664, 89037799664 или 79037799664:"
-        )
-        return ConversationHandler.END  # Или ENTERING_PHONE, если хочешь оставить в этом состоянии
+        await update.message.reply_text("Некорректный номер телефона. Введите в формате +79037799664:")
+        return ENTERING_PHONE
 
-    # Приводим номер к формату +7XXXXXXXXXX
+    # Нормализация
     if user_input.startswith("8"):
         user_input = "+7" + user_input[1:]
     elif not user_input.startswith("+7"):
         user_input = "+7" + user_input
 
-    # Сохраняем номер в user_data
+    # Эффект распыления
+    await asyncio.sleep(1.5)
+    await update.message.delete()
+
+    # Сохраняем данные
     context.user_data["phone_number"] = user_input
     context.user_data.pop("state", None)
 
-    # Получаем остальные данные пользователя
-    boat = context.user_data.get("selected_boat", "Не выбрано")
-    date = context.user_data.get("selected_date", "Не выбрано")
-    time = context.user_data.get("selected_time", "Не выбрано")
-    name = context.user_data.get("user_name", "Не указано")
-    phone = context.user_data.get("phone_number", "Не указано")
+    boat = context.user_data.get("selected_boat")
+    date = context.user_data.get("selected_date")
+    time = context.user_data.get("selected_time")
+    name = context.user_data.get("user_name")
+    message_id = context.user_data.get("booking_message_id")
 
-    # Формируем сообщение для администратора
+    confirmation_text = (
+        f"📌 Ваша запись:\n"
+        f"- Лодка: {boat}\n"
+        f"- Дата: {date}\n"
+        f"- Время: {time}\n"
+        f"- Имя: {name}\n"
+        f"- Телефон: {user_input}\n"
+        f"✅ Ваша заявка отправлена администратору. Ожидайте подтверждения."
+    )
+
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]
+    ])
+
+    await context.bot.edit_message_text(
+        chat_id=user_chat_id,
+        message_id=message_id,
+        text=confirmation_text,
+        reply_markup=reply_markup
+    )
+
+    # Сохраняем в память
+    context.bot_data[f"booking_msg_id-{user_chat_id}"] = message_id
+    context.bot_data[user_chat_id] = {
+        "selected_boat": boat,
+        "selected_date": date,
+        "selected_time": time,
+        "user_name": name,
+        "phone_number": user_input
+    }
+
+    # Уведомление админу
     admin_message = (
         f"🔔 **Новая заявка на бронирование!**\n"
         f"- 🚤 Лодка: {boat}\n"
         f"- 📅 Дата: {date}\n"
         f"- ⏰ Время: {time}\n"
         f"- 👤 Имя: {name}\n"
-        f"- 📞 Телефон: {phone}"
+        f"- 📞 Телефон: {user_input}"
     )
-
-    # Формируем сообщение подтверждения для пользователя
-    confirmation_message = (
-        f"📌 Ваша запись:\n"
-        f"- Лодка: {boat}\n"
-        f"- Дата: {date}\n"
-        f"- Время: {time}\n"
-        f"- Имя: {name}\n"
-        f"- Телефон: {phone}\n"
-        f"✅ Ваша заявка отправлена администратору. Ожидайте подтверждения."
-    )
-
-    # Кнопки для пользователя
-    keyboard = [
-        [InlineKeyboardButton("🔙 Назад", callback_data="go_back")],
-        [InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Отправляем подтверждение пользователю
-    sent = await update.message.reply_text(confirmation_message, reply_markup=reply_markup)
-    context.user_data["booking_message_id"] = sent.message_id
-
-    # Уведомляем администратора
-    user_chat_id = update.effective_user.id
-    user_chat_id = update.effective_user.id
-
-    context.bot_data[user_chat_id] = {
-        "selected_boat": boat,
-        "selected_date": date,
-        "selected_time": time,
-        "user_name": name,
-        "phone_number": phone
-    }
+    context.bot_data[f"pending-{user_chat_id}"] = True
+    context.bot_data[f"pending_msg_id-{user_chat_id}"] = message_id
     await notify_admin(context, admin_message, user_chat_id)
-
     return ConversationHandler.END
 BOOKINGS_FILE = "bookings.json"
 
-def save_booking_to_file(user_id, booking_data):
-    try:
-        data = {}
-
-        if os.path.exists(BOOKINGS_FILE):
-            with open(BOOKINGS_FILE, "r", encoding="utf-8") as f:
-                try:
-                    content = f.read().strip()
-                    if content:
-                        data = json.loads(content)
-                except json.JSONDecodeError:
-                    print("⚠️ bookings.json повреждён или пуст — перезаписываем.")
-                    data = {}
-
-        data[str(user_id)] = booking_data
-
-        with open(BOOKINGS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        print(f"✅ Бронь пользователя {user_id} сохранена.")
-    except Exception as e:
-        print(f"❌ Ошибка при сохранении брони: {e}")
-
-
-def delete_booking(user_id):
-    try:
-        if not os.path.exists(BOOKINGS_FILE):
-            return
-
-        with open(BOOKINGS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        if str(user_id) in data:
-            del data[str(user_id)]
-
-            with open(BOOKINGS_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-
-            print(f"🗑️ Бронь пользователя {user_id} удалена.")
-    except Exception as e:
-        print(f"❌ Ошибка при удалении брони: {e}")
 def get_taken_slots(date: str, boat: str, staff_id: int) -> set:
     """Объединяет занятые слоты из YCLIENTS и локального файла."""
     taken = set()
 
-    # Локальные записи (Telegram)
-    if os.path.exists(BOOKINGS_FILE):
-        with open(BOOKINGS_FILE, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-                for b in data.values():
-                    if b.get("selected_date") == date and b.get("selected_boat") == boat:
-                        taken.add(b.get("selected_time"))
-            except Exception as e:
-                print(f"Ошибка чтения bookings.json: {e}")
+    # 🔹 Локальные записи (Telegram)
+    try:
+        all_bookings = get_all_bookings()
+        for b in all_bookings.values():
+            if b.get("selected_date") == date and b.get("selected_boat") == boat:
+                taken.add(b.get("selected_time"))
+    except Exception as e:
+        print(f"❌ Ошибка чтения local bookings: {e}")
 
-    # Записи из YCLIENTS
+    # 🔹 Записи из YCLIENTS
     try:
         external = get_yclients_bookings(date)
         for record in external:
@@ -272,9 +252,10 @@ def get_taken_slots(date: str, boat: str, staff_id: int) -> set:
                 except Exception:
                     continue
     except Exception as e:
-        print(f"Ошибка получения слотов из YCLIENTS: {e}")
+        print(f"❌ Ошибка получения слотов из YCLIENTS: {e}")
 
     return taken
+
 def create_yclients_booking(data: dict):
     url = "https://api.yclients.com/api/v1/record"
     headers = {
