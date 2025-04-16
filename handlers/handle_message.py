@@ -436,19 +436,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 context.bot_data.pop(f"pending-{user_chat_id}", None)
                 # ⬇️ Добавляем вызов Yclients API
                 try:
+                    booking_data = context.bot_data.get(user_chat_id)
+                    if not booking_data:
+                        raise ValueError("Нет данных о брони в context.bot_data")
+
+                    boat = booking_data.get("selected_boat")  # 🔧 Вот это обязательно!
                     date_str = booking_data.get("selected_date")
                     time_raw = booking_data.get("selected_time")
-
-                    if not date_str or not time_raw:
-                        raise ValueError("Не хватает даты или времени для создания брони")
-
                     start_time = time_raw.split(" - ")[0]
+
                     existing = get_yclients_bookings(date_str)
-                    staff_id = 3813130  # или через staff_map[boat]
-                    start_time = f"{date_str}T{start_time}:00"
+                    start_time_full = f"{date_str}T{start_time}:00"
 
                     already_taken = any(
-                        b.get("staff", {}).get("id") == staff_id and b.get("datetime") == start_time
+                        b.get("staff", {}).get("id") == 19177301 and b.get("datetime") == start_time_full
                         for b in existing
                     )
 
@@ -462,11 +463,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                     # Отправляем в YCLIENTS
                     success = create_yclients_booking(
-                        name=booking_data["user_name"],
-                        phone=booking_data["phone_number"],
-                        date=date_str,
-                        boat=boat,
-                        staff_id=19177301
+                    name=booking_data["user_name"],
+                    phone=booking_data["phone_number"],
+                    date=date_str,
+                    time=start_time,
+                    boat=boat,
+                    staff_id=19177301
                     )
 
                     if not success:
