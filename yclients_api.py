@@ -9,7 +9,7 @@ PARTNER_TOKEN = os.getenv("PARTNER_TOKEN", "4a4jpwj3su8kecfw46t9")
 X_PARTNER_ID = os.getenv("X_PARTNER_ID", "8572")
 
 COMPANY_ID = int(os.getenv("COMPANY_ID", "1283794"))
-DEFAULT_STAFF_ID = int(os.getenv("DEFAULT_STAFF_ID", "19177301"))
+DEFAULT_STAFF_ID = int(os.getenv("DEFAULT_STAFF_ID", "3832174"))
 
 # Услуги по цвету лодки
 SERVICE_IDS = {
