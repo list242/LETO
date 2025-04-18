@@ -152,17 +152,21 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text.strip()
     user_chat_id = update.effective_user.id
 
-    # Проверка формата номера
-    phone_pattern = re.compile(r"^\+?\d{10,15}$")
-    if not phone_pattern.match(user_input):
-        await update.message.reply_text("Некорректный номер телефона. Введите в формате +79037799664:")
+    # Нормализация номера
+    if user_input.startswith("8") and len(user_input) == 11:
+        user_input = "+7" + user_input[1:]
+    elif user_input.startswith("7") and len(user_input) == 11:
+        user_input = "+7" + user_input[1:]
+    elif user_input.startswith("+7") and len(user_input) == 12:
+        pass  # всё ок
+    else:
+        await update.message.reply_text("Некорректный номер телефона. Введите номер в формате +7XXXXXXXXXX:")
         return ENTERING_PHONE
 
-    # Нормализация
-    if user_input.startswith("8"):
-        user_input = "+7" + user_input[1:]
-    elif not user_input.startswith("+7"):
-        user_input = "+7" + user_input
+    # После нормализации ещё раз проверяем
+    if not re.match(r"^\+7\d{10}$", user_input):
+        await update.message.reply_text("Некорректный номер телефона. Введите номер в формате +7XXXXXXXXXX:")
+        return ENTERING_PHONE
 
     # Эффект распыления
     await asyncio.sleep(1.5)
