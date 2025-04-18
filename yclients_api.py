@@ -103,3 +103,27 @@ def get_yclients_bookings(date: str) -> list:
         print("💥 Ошибка при запросе записей:", e)
 
     return []
+def delete_yclients_booking(record_id: int) -> bool:
+    """
+    Удаляет запись в YCLIENTS по её ID.
+    """
+    headers = {
+        "Authorization": f"Bearer {PARTNER_TOKEN}, User {USER_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.yclients.v2+json",
+        "X-Partner-Id": X_PARTNER_ID
+    }
+
+    url = f"https://api.yclients.com/api/v1/record/{COMPANY_ID}/{record_id}"
+
+    try:
+        response = requests.delete(url, headers=headers)
+        print("➡️ Удаление записи в YCLIENTS:", response.status_code, response.text)
+        if response.status_code == 200:
+            return response.json()  # Возвращаем полный ответ от API
+        else:
+            return {"success": False, "error": response.text}
+
+    except Exception as e:
+        print(f"💥 Ошибка при удалении записи в YCLIENTS: {e}")
+        return False

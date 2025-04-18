@@ -236,9 +236,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         elif data == "cancel_booking":
             user_chat_id = update.effective_user.id
+
+            booking = context.bot_data.get(user_chat_id)
             if not booking:
                 await query.edit_message_text("❌ У вас нет активной записи.")
                 return
+
             boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
             date = context.user_data.get("selected_date", "📅 Не выбрано")
             time = context.user_data.get("selected_time", "⏰ Не выбрано")
@@ -254,9 +257,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"- Телефон: {phone}"
             )
 
+            # Удаляем локальную бронь
             delete_booking(user_chat_id)
-            for key in ["selected_boat", "selected_date", "selected_time", "user_name", "phone_number", "state"]:
-                context.user_data.pop(key, None)
+
+            # ➡️ Вот сюда вставляем удаление из YCLIENTS:
+            record_id = context.bot_data.get(f"yclients_record_id-{user_chat_id}")
+            if record_id:
+                from yclients_api import delete_yclients_booking
+                success = delete_yclients_booking(record_id)
+                if success:
+                    print(f"✅ Запись {record_id} успешно удалена из YCLIENTS")
+                else:
+                    print(f"⚠️ Не удалось удалить запись {record_id} из YCLIENTS")
+
+            # Потом уже уведомляем админа
             await notify_admin(context, admin_message, user_chat_id)
 
             context.bot_data[f"pending-{user_chat_id}"] = True
@@ -269,6 +283,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             await query.edit_message_text(user_message, reply_markup=reply_markup)
+
 
 
         # Перенос бронирования
@@ -452,14 +467,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         return
 
 
-                    success = create_yclients_booking(
-                    name=booking_data["user_name"],
-                    phone=booking_data["phone_number"],
-                    date=date_str,
-                    time=start_time,
-                    boat=boat,
-                    staff_id=3832174
+                    response = create_yclients_booking(
+                        name=booking_data["user_name"],
+                        phone=booking_data["phone_number"],
+                        date=date_str,
+                        time=start_time,
+                        staff_id=3813130
                     )
+                    record_id = response.get("data", {}).get("id")
+                    if record_id:
+                        context.bot_data[f"yclients_record_id-{user_chat_id}"] = record_id
+                        print(f"✅ Сохранили record_id для удаления: {record_id}")
+                    else:
+                        print(f"⚠️ Ошибка: не получили record_id из ответа YCLIENTS: {response}")
+
 
                     if not success:
                         print("❌ Ошибка при бронировании через YCLIENTS API")

@@ -206,12 +206,20 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Сохраняем в память
     context.bot_data[f"booking_msg_id-{user_chat_id}"] = message_id
     context.bot_data[user_chat_id] = {
-        "selected_boat": boat,
-        "selected_date": date,
-        "selected_time": time,
-        "user_name": name,
-        "phone_number": user_input
-    }
+            "selected_boat": boat,
+            "selected_date": date,
+            "selected_time": time,
+            "user_name": name,
+            "phone_number": user_input
+        }
+
+        # ➡️ Здесь добавляем получение record_id из ответа от YCLIENTS
+    response = context.bot_data.get(f"yclients_create_response-{user_chat_id}")
+    if response:
+        record_id = response.get("data", {}).get("id")
+        if record_id:
+            context.bot_data[f"yclients_record_id-{user_chat_id}"] = record_id
+
 
     # Уведомление админу
     admin_message = (
