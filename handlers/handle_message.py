@@ -64,7 +64,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Получаем прогноз погоды для выбранной даты
             weather = get_weather_for_date(selected_date)
 
-            # Формируем текст с погодой
             weather_text = (
                 f"📅 Вы выбрали {selected_date}\n"
                 f"🌡️ Температура: {weather['temp']}°C\n"
@@ -75,7 +74,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             weather_text += "\nТеперь выберите время:"
 
-            # Клавиатура с интервалами времени
             time_slots = [
                 "11:00 - 12:30",
                 "13:00 - 14:30",
@@ -112,7 +110,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
         elif data == "go_back":
-            # Возвращаем пользователя в выбор лодки
+
             keyboard = [
                 [InlineKeyboardButton("Синяя лодка", callback_data="blue")],
                 [InlineKeyboardButton("Красная лодка", callback_data="red")],
@@ -122,13 +120,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text("Выберите лодку:", reply_markup=reply_markup)
 
-            # Очищаем частично введённые данные
+
             context.user_data.pop("user_name", None)
             context.user_data.pop("phone_number", None)
             context.user_data["state"] = None
 
         elif data == "back":
-            # Получаем дату начала текущей недели из контекста
+
             current_week_start = context.user_data.get("current_week_start", datetime.now().date())
             prev_week_start = current_week_start - timedelta(days=7)
             if prev_week_start < datetime.now().date():
@@ -145,7 +143,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 )
             else:
-                # Обновляем состояние на предыдущую неделю
+
                 context.user_data["current_week_start"] = prev_week_start
                 keyboard = generate_date_keyboard(prev_week_start, context)
                 reply_markup = keyboard
@@ -154,18 +152,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"Вы выбрали лодку {boat}. Теперь выберите дату:",
                     reply_markup=reply_markup
                 )
-# Обработка кнопки "Назад" и других кнопок
         elif data == "back_to_start":
             if context.bot_data.get(f"pending-{user_chat_id}"):
                 await query.answer("⏳ Ожидайте подтверждения от администратора.")
                 return
             keyboard = []
-            # Если пользователь сделал запись, добавляем кнопку "Моя запись"
             if get_booking(user_chat_id):
-                # Убираем кнопку "Выбор лодки", если есть запись
+
                 keyboard.append([InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")])
 
-            # Если записи нет, показываем кнопку "Выбор лодки"
             else:
                 keyboard.append([InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")])
 
@@ -181,16 +176,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
 
-        # Обработка кнопки "Вперед"
+
         elif data == "forward":
-            # Получаем дату начала текущей недели из контекста
+
             current_week_start = context.user_data.get("current_week_start", datetime.now().date())
 
-            # Переходим к следующей неделе
-            next_week_start = current_week_start + timedelta(days=7)
-            context.user_data["current_week_start"] = next_week_start  # Обновляем состояние
 
-            # Генерируем клавиатуру для следующей недели
+            next_week_start = current_week_start + timedelta(days=7)
+            context.user_data["current_week_start"] = next_week_start 
+
+
             keyboard = generate_date_keyboard(next_week_start, context)
             reply_markup = keyboard
 
@@ -238,16 +233,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             await query.edit_message_text(message, reply_markup=reply_markup)
-        # Обработка кнопки "Отмена записи"# Отмена бронирования
+
         elif data == "cancel_booking":
-            booking = get_booking(user_chat_id)
+            user_chat_id = update.effective_user.id
             if not booking:
                 await query.edit_message_text("❌ У вас нет активной записи.")
                 return
             boat = context.user_data.get("selected_boat", "🚤 Не выбрано")
             date = context.user_data.get("selected_date", "📅 Не выбрано")
             time = context.user_data.get("selected_time", "⏰ Не выбрано")
-            user_chat_id = update.effective_user.id
+            name = context.user_data.get("user_name", "❓ Не указано")
+            phone = context.user_data.get("phone_number", "❓ Не указано")
 
             admin_message = (
                 f"⚠️ Пользователь хочет отменить запись:\n"
@@ -258,13 +254,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"- Телефон: {phone}"
             )
 
-            # Удаляем локальную бронь
             delete_booking(user_chat_id)
-
-            # Отправляем уведомление админу
+            for key in ["selected_boat", "selected_date", "selected_time", "user_name", "phone_number", "state"]:
+                context.user_data.pop(key, None)
             await notify_admin(context, admin_message, user_chat_id)
 
-            # Сохраняем состояние отмены
             context.bot_data[f"pending-{user_chat_id}"] = True
             context.bot_data[f"pending_msg_id-{user_chat_id}"] = query.message.message_id
             context.bot_data[f"cancel-{user_chat_id}"] = True
@@ -322,7 +316,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 )
         
-        # Проверяем, какое время выбрал пользователь
         elif data.startswith("time-"):
             if get_booking(user_chat_id):
                 await query.answer("❗ У вас уже есть активная запись.")
@@ -345,7 +338,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.edit_message_text("Некорректный формат даты. Попробуйте снова.")
                 return
 
-            # Текст с подтверждением и просьбой ввести имя
             text = (
                 f"📌 Вы выбрали:\n"
                 f"- Лодка: {boat}\n"
@@ -356,7 +348,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await query.edit_message_text(text=text)
 
-            # Сохраняем message_id для дальнейших обновлений
             context.user_data["booking_message_id"] = query.message.message_id
 
             return ENTERING_NAME
@@ -404,7 +395,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     keyboard = [
                         [InlineKeyboardButton("🏠 Выйти в меню", callback_data="back_to_start")]
                     ]
-                    # Сброс всех пользовательских данных
 
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     message_id = context.bot_data.pop(f"reschedule_msg_id-{user_chat_id}", None)
@@ -418,7 +408,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             reply_markup=reply_markup
                         )
                     else:
-                        # fallback, если message_id не найден
+
                         await context.bot.send_message(
                             chat_id=user_chat_id,
                             text="✅ Ваш запрос на перенос подтверждён!\n"
@@ -434,13 +424,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     raise ValueError("Нет данных о брони в context.bot_data")
                 save_booking_to_file(user_chat_id, booking_data)
                 context.bot_data.pop(f"pending-{user_chat_id}", None)
-                # ⬇️ Добавляем вызов Yclients API
+
                 try:
                     booking_data = context.bot_data.get(user_chat_id)
                     if not booking_data:
                         raise ValueError("Нет данных о брони в context.bot_data")
 
-                    boat = booking_data.get("selected_boat")  # 🔧 Вот это обязательно!
+                    boat = booking_data.get("selected_boat") 
                     date_str = booking_data.get("selected_date")
                     time_raw = booking_data.get("selected_time")
                     start_time = time_raw.split(" - ")[0]
@@ -461,7 +451,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         await query.edit_message_text("❌ Подтверждение отклонено. Время уже занято.")
                         return
 
-                    # Отправляем в YCLIENTS
+
                     success = create_yclients_booking(
                     name=booking_data["user_name"],
                     phone=booking_data["phone_number"],
