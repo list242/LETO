@@ -480,6 +480,33 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         print(f"✅ Сохранили record_id для удаления: {record_id}")
                     else:
                         print(f"⚠️ Ошибка: не получили record_id из ответа YCLIENTS: {response}")
+                    if response.get("meta", {}).get("conflict", False):
+    # Сообщение пользователю
+                        await context.bot.send_message(
+                            chat_id=user_chat_id,
+                            text="❌ К сожалению, выбранное вами время уже занято.\nПожалуйста, выберите другое время."
+                        )
+
+                        # Очищаем старые данные
+                        for key in ["selected_time"]:
+                            context.user_data.pop(key, None)
+
+                        # Переводим пользователя обратно на выбор времени
+                        selected_date = context.user_data.get("selected_date")
+                        boat = context.user_data.get("selected_boat")
+
+                        if selected_date and boat:
+                            from handlers.utils import generate_date_keyboard
+                            keyboard = generate_date_keyboard(datetime.fromisoformat(selected_date), context)
+                            reply_markup = keyboard
+
+                            await context.bot.send_message(
+                                chat_id=user_chat_id,
+                                text=f"📅 Выберите новое время для лодки {boat} на дату {selected_date}:",
+                                reply_markup=reply_markup
+                            )
+
+                        return
 
 
                     if not success:
