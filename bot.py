@@ -35,20 +35,19 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_id = context.bot_data.get(f"booking_msg_id-{user_id}")
 
     if action == "approve":
-        await context.bot.edit_message_text(
+        await context.bot.send_message(
             chat_id=user_id,
-            message_id=message_id,
             text="✅ Ваша бронь подтверждена администратором."
         )
         await query.edit_message_text("✅ Заявка одобрена.")
     elif action == "reject":
-        await context.bot.edit_message_text(
+        await context.bot.send_message(
             chat_id=user_id,
-            message_id=message_id,
             text="❌ Ваша бронь отклонена администратором."
         )
         await query.edit_message_text("❌ Заявка отклонена.")
         delete_booking(user_id)
+
 
     context.bot_data.pop(f"pending-{user_id}", None)
     context.bot_data.pop(f"booking_msg_id-{user_id}", None)
