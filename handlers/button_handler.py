@@ -47,11 +47,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_chat_id = update.effective_user.id
     # ❗ Проверка: если есть активный запрос (перенос, отмена, ожидание)
     admins = load_admins()
-    if user_chat_id not in admins and any([
-        context.bot_data.get(f"pending-{user_chat_id}"),
-        context.bot_data.get(f"reschedule-{user_chat_id}"),
-        context.bot_data.get(f"cancel-{user_chat_id}")
-    ]):
+    if user_chat_id not in admins and context.bot_data.get(f"pending-{user_chat_id}"):
+
         if update.message:
             await update.message.reply_text("⏳ Ожидайте подтверждения от администратора.")
         elif update.callback_query:

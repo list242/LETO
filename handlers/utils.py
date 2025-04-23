@@ -8,7 +8,8 @@ import requests
 import os, asyncio
 import re
 from yclients_api import get_yclients_bookings
-from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
+from bookings_storage import get_booking, get_all_bookings
+#from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
 
 ADMIN_FILE = "admins.json"
 MAX_DATE = datetime(2025, 8, 31).date()
