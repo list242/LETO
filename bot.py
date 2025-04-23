@@ -18,19 +18,6 @@ if not TOKEN:
 
 application = Application.builder().token(TOKEN).build()
 
-# Обработчики
-application.add_handler(start_handler)
-application.add_handler(boat_handler)
-application.add_handler(faq_handler)
-application.add_handler(help_handler)
-application.add_handler(CommandHandler("register", register_admin))
-application.add_handler(conv_handler)
-application.add_handler(CommandHandler("start_quiz", start_quiz))
-application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
-application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
-#application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
-application.add_handler(callback_handler)  # <-- обязательно в самом конце
-
 # Новый обработчик одобрения/отклонения заявок
 async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -65,3 +52,16 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.bot_data.pop(f"pending-{user_id}", None)
     context.bot_data.pop(f"booking_msg_id-{user_id}", None)
+
+# Обработчики
+application.add_handler(start_handler)
+application.add_handler(boat_handler)
+application.add_handler(faq_handler)
+application.add_handler(help_handler)
+application.add_handler(CommandHandler("register", register_admin))
+application.add_handler(conv_handler)
+application.add_handler(CommandHandler("start_quiz", start_quiz))
+application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
+application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
+application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
+application.add_handler(callback_handler)  # <-- обязательно в самом конце
