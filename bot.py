@@ -9,7 +9,7 @@ from handlers.button_handler import start_quiz, handle_quiz_answer
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from bookings_storage import delete_booking
-from utils import load_admins
+from handlers.utils import load_admins
 
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 #TOKEN = os.getenv("BOT_TOKEN")
