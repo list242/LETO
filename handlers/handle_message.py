@@ -3,18 +3,35 @@ import os
 import asyncio
 import calendar
 from datetime import datetime, timedelta
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from handlers.utils import generate_date_keyboard, notify_admin, ENTERING_PHONE, enter_name, enter_phone
-from handlers.utils import ENTERING_NAME
-from handlers.utils import save_booking_to_file, delete_booking, get_taken_slots
-from weather import get_weather_for_date
-from yclients_api import create_yclients_booking
-from datetime import datetime# добавь в начало файла, если ещё нет
-from handlers.utils import is_slot_taken_yclients, load_admins
-from yclients_api import get_yclients_bookings, DEFAULT_STAFF_ID
-from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
 
+from handlers.utils import (
+    generate_date_keyboard,
+    notify_admin,
+    ENTERING_PHONE,
+    ENTERING_NAME,
+    enter_name,
+    enter_phone,
+    get_taken_slots,
+    is_slot_taken_yclients,
+    load_admins,
+)
+
+from bookings_storage import (
+    save_booking_to_file,
+    delete_booking,
+    get_booking,
+    get_all_bookings,
+)
+
+from weather import get_weather_for_date
+from yclients_api import (
+    create_yclients_booking,
+    get_yclients_bookings,
+    DEFAULT_STAFF_ID,
+)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
