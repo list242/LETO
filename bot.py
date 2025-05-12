@@ -10,7 +10,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from bookings_storage import delete_booking
 from handlers.utils import load_admins
-
+from telegram.ext import MessageHandler, filters
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
@@ -50,7 +50,12 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.bot_data.pop(f"pending-{user_id}", None)
     context.bot_data.pop(f"booking_msg_id-{user_id}", None)
 
+async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.photo:
+        photo = update.message.photo[-1]  # Самое большое разрешение
+        await update.message.reply_text(f"📎 File ID: {photo.file_id}")
 
+application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(faq_handler)
