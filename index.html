@@ -1,0 +1,51 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Выбор лодки</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    button {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      padding: 12px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: #1976d2;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚤 Выберите лодку</h1>
+  <button onclick="send('blue')">🔵 Синяя лодка</button>
+  <button onclick="send('red')">🔴 Красная лодка</button>
+  <button onclick="send('white')">⚪ Белая лодка</button>
+
+  <script>
+    function send(color) {
+      Telegram.WebApp.sendData(JSON.stringify({ boat: color }));
+    }
+  </script>
+</body>
+</html>
