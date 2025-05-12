@@ -3,8 +3,7 @@ import os
 import asyncio
 import calendar
 from datetime import datetime, timedelta
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import ContextTypes
 
 from handlers.utils import (
@@ -193,37 +192,48 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         elif data == "photo_blue":
             await query.answer()
-            await context.bot.send_photo(chat_id=query.message.chat_id, photo="AgACAgIAAxkBAAIJ02giSJcpSAoGo8fDHditjS6GckXIAALV7jEbgsIQSY2bTEViG35TAQADAgADeQADNgQ")
-            await query.edit_message_text("🔵 Синяя лодка", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]]))
+            await query.edit_message_media(
+                media=InputMediaPhoto(
+                    media="AgACAgIAAxkBAAIJ02giSJcpSAoGo8fDHditjS6GckXIAALV7jEbgsIQSY2bTEViG35TAQADAgADeQADNgQ",
+                    caption="🔵 Синяя лодка"
+                ),
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
+            )
 
         elif data == "photo_red":
             await query.answer()
-            await context.bot.send_photo(chat_id=query.message.chat_id, photo="AgACAgIAAxkBAAIJ0WgiSIujzVZaj1nE3KQnJOZW7c73AALU7jEbgsIQSYROYsMRTmp4AQADAgADeQADNgQ")
-            await query.edit_message_text("🔴 Красная лодка", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]]))
+            await query.edit_message_media(
+                media=InputMediaPhoto(
+                    media="AgACAgIAAxkBAAIJ0WgiSIujzVZaj1nE3KQnJOZW7c73AALU7jEbgsIQSYROYsMRTmp4AQADAgADeQADNgQ",
+                    caption="🔴 Красная лодка"
+                ),
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
+            )
 
         elif data == "photo_white":
             await query.answer()
-            await context.bot.send_photo(chat_id=query.message.chat_id, photo="AgACAgIAAxkBAAIJ12giSK9EYkX5Sekn4XsdZvB5hYWGAALX7jEbgsIQSZdYZcZyjC5oAQADAgADeQADNgQ")
-            await query.edit_message_text("⚪ Белая лодка", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]]))
-
+            await query.edit_message_media(
+                media=InputMediaPhoto(
+                    media="AgACAgIAAxkBAAIJ12giSK9EYkX5Sekn4XsdZvB5hYWGAALX7jEbgsIQSZdYZcZyjC5oAQADAgADeQADNgQ",
+                    caption="⚪ Белая лодка"
+                ),
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
+            )
         elif data == "show_boat_photos":
             await query.answer()
-            # Отправляем логотип
-            await context.bot.send_photo(
-                chat_id=query.message.chat_id,
-                photo="AgACAgIAAxkBAAIJ1WgiSJ4Y8afXpPIGFJdNIZmIgQABuQAC1u4xG4LCEElG9w_nn7B3XAEAAwIAA3gAAzYE"
+            await query.edit_message_media(
+                media=InputMediaPhoto(
+                    media="AgACAgIAAxkBAAIJ1WgiSJ4Y8afXpPIGFJdNIZmIgQABuQAC1u4xG4LCEElG9w_nn7B3XAEAAwIAA3gAAzYE",
+                    caption="📷 Фото лодок:\n\nВыберите лодку ниже"
+                ),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue")],
+                    [InlineKeyboardButton("🔴 Красная", callback_data="photo_red")],
+                    [InlineKeyboardButton("⚪ Белая", callback_data="photo_white")],
+                    [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
+                ])
             )
 
-            keyboard = [
-                [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue")],
-                [InlineKeyboardButton("🔴 Красная", callback_data="photo_red")],
-                [InlineKeyboardButton("⚪ Белая", callback_data="photo_white")],
-                [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
-            ]
-            await query.edit_message_text(
-                "Выберите лодку, чтобы посмотреть фото:",
-                reply_markup=InlineKeyboardMarkup(keyboard)
-            )
 
 
         elif data == "forward":
