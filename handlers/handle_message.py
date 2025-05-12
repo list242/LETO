@@ -17,6 +17,33 @@ from handlers.utils import (
     is_slot_taken_yclients,
     load_admins,
 )
+boat_photos = {
+    "red": {
+        "name": "🔴 Красная лодка",
+        "photos": ["AgACAgIAAxkBAAIJ7mgiUEYejU9rCnWd8yx8ysmDNmQhAAL57jEbgsIQSWOL_YKwFvavAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ5mgiUDoLoapGLQ8P7wwfsr82CmGuAAL27jEbgsIQSVVwksWQMSy0AQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ6GgiUD5NLqLoj5Un3nugAdS0WfngAAL37jEbgsIQSbEtTl7AFoCcAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ6mgiUEGWfGwdBJBIRqriTNeD-8vBAAL47jEbgsIQSWYCAAG1BP1zzgEAAwIAA3gAAzYE",
+                   "AgACAgIAAxkBAAIJ7GgiUERUIu_cgof8ufLmRkowV1pGAALv7jEbnVAYSddk2aHgv3W0AQADAgADeAADNgQ"
+                   ]
+    },
+    "blue": {
+        "name": "🔵 Синяя лодка",
+        "photos": ["AgACAgIAAxkBAAIJ8GgiUElXydOz_R9z48cvhP6BtT5eAAL67jEbgsIQSexV98cJYhdOAQADAgADeAADNgQ", 
+                   "AgACAgIAAxkBAAIJ8mgiUE7NPZgAAVhr09ZZHdQZCU9j0QAC--4xG4LCEEmIYVaOPFt94QEAAwIAA3gAAzYE",
+                   "AgACAgIAAxkBAAIJ9GgiUFFXrdawEuvENhkxpN9yhguxAAL87jEbgsIQSS9I60fWlkQiAQADAgADeAADNgQ"
+                   ]
+    },
+    "white": {
+        "name": "⚪ Белая лодка",
+        "photos": ["AgACAgIAAxkBAAIJ_mgiUGcwDUaZrp-AFltDMoZrgmlgAAII7zEbgsIQSe7owVRTdxdvAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ_GgiUGM2eU9j3JhmLNcuXNDSDs8FAAIH7zEbgsIQSdPzhY6HtFF-AQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ-mgiUF62Nood_-nB2l_Bh_j3jfAUAAIG7zEbgsIQScILOejghOD4AQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ-GgiUFz5EncyEeUpmgiHfiZoZikGAAID7zEbgsIQSYUzXrXK97qIAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAIJ9mgiUFlzMDnE-YU-WoWFe3SVlWmiAAIC7zEbgsIQSblwoFwi98XSAQADAgADeAADNgQ"
+                   ]
+    }
+}
 
 from bookings_storage import (
     save_booking_to_file,
@@ -190,35 +217,42 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "👋 Добро пожаловать! Выберите один из пунктов ниже:", 
                 reply_markup=reply_markup
             )
-        elif data == "photo_blue":
-            await query.answer()
+        elif data.startswith("photo_"):
+            _, boat, direction = data.split("_")  # например photo_red_next
+            index_key = f"photo_{boat}_index"
+
+            photos = boat_photos[boat]["photos"]
+            title = boat_photos[boat]["name"]
+            current = context.user_data.get(index_key, 0)
+
+            if direction == "start":
+                current = 0
+            elif direction == "next" and current + 1 < len(photos):
+                current += 1
+            elif direction == "prev" and current > 0:
+                current -= 1
+            else:
+                await query.answer("Это крайнее фото.")
+                return
+
+            context.user_data[index_key] = current
+
+            # Кнопки листания
+            buttons = []
+            if current > 0:
+                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
+            if current + 1 < len(photos):
+                buttons.append(InlineKeyboardButton("➡️ Вперёд", callback_data=f"photo_{boat}_next"))
+            buttons.append(InlineKeyboardButton("🏠 Меню", callback_data="back_to_start"))
+
             await query.edit_message_media(
                 media=InputMediaPhoto(
-                    media="AgACAgIAAxkBAAIJ02giSJcpSAoGo8fDHditjS6GckXIAALV7jEbgsIQSY2bTEViG35TAQADAgADeQADNgQ",
-                    caption="🔵 Синяя лодка"
+                    media=photos[current],
+                    caption=f"{title} ({current + 1}/{len(photos)})"
                 ),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
+                reply_markup=InlineKeyboardMarkup([buttons])
             )
 
-        elif data == "photo_red":
-            await query.answer()
-            await query.edit_message_media(
-                media=InputMediaPhoto(
-                    media="AgACAgIAAxkBAAIJ0WgiSIujzVZaj1nE3KQnJOZW7c73AALU7jEbgsIQSYROYsMRTmp4AQADAgADeQADNgQ",
-                    caption="🔴 Красная лодка"
-                ),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
-            )
-
-        elif data == "photo_white":
-            await query.answer()
-            await query.edit_message_media(
-                media=InputMediaPhoto(
-                    media="AgACAgIAAxkBAAIJ12giSK9EYkX5Sekn4XsdZvB5hYWGAALX7jEbgsIQSZdYZcZyjC5oAQADAgADeQADNgQ",
-                    caption="⚪ Белая лодка"
-                ),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="show_boat_photos")]])
-            )
         elif data == "show_boat_photos":
             await query.answer()
             await query.edit_message_media(
