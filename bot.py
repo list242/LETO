@@ -15,6 +15,15 @@ from telegram.ext import MessageHandler, filters
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+import os
+
+app = FastAPI()
+
+@app.get("/")
+async def serve_webapp():
+    return FileResponse("index.html")
 
 application = Application.builder().token(TOKEN).build()
 async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
