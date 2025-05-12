@@ -10,13 +10,17 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from bookings_storage import delete_booking
 from handlers.utils import load_admins
+import json
 from telegram.ext import MessageHandler, filters
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
 
 application = Application.builder().token(TOKEN).build()
-
+async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = json.loads(update.message.web_app_data.data)  # {"boat": "blue"}
+    boat = data.get("boat")
+    await update.message.reply_text(f"✅ Вы выбрали лодку: {boat.capitalize()}")
 # Новый обработчик одобрения/отклонения заявок
 async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -54,6 +58,7 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
         photo = update.message.photo[-1]  # Самое большое разрешение
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
+application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
