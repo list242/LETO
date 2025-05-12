@@ -12,7 +12,6 @@ from bookings_storage import delete_booking
 from handlers.utils import load_admins
 
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
-#TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
 
@@ -31,7 +30,6 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in admins:
         await query.edit_message_text("❌ У вас нет прав для этого действия.")
         return
-
     message_id = context.bot_data.get(f"booking_msg_id-{user_id}")
 
     if action == "approve":
@@ -52,7 +50,7 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.bot_data.pop(f"pending-{user_id}", None)
     context.bot_data.pop(f"booking_msg_id-{user_id}", None)
 
-# Обработчики
+
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(faq_handler)
