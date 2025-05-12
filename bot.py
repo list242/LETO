@@ -54,7 +54,6 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
         photo = update.message.photo[-1]  # Самое большое разрешение
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
-
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
