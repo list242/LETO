@@ -57,10 +57,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
     [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+    [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
     [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
     [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
     [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
     ]
+
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     if update.message:
