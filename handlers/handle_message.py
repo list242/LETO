@@ -266,9 +266,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     caption="📷 Фото лодок:\n\nВыберите лодку ниже"
                 ),
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue")],
-                    [InlineKeyboardButton("🔴 Красная", callback_data="photo_red")],
-                    [InlineKeyboardButton("⚪ Белая", callback_data="photo_white")],
+                    [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue_start")],
+                    [InlineKeyboardButton("🔴 Красная", callback_data="photo_red_start")],
+                    [InlineKeyboardButton("⚪ Белая", callback_data="photophoto_white_start_white")],
                     [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
                 ])
             )
