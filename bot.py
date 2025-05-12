@@ -1,30 +1,22 @@
 # bot.py
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
+from telegram.ext import ContextTypes
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from handlers.button_handler import (
     start_handler, faq_handler, help_handler,
-    callback_handler, boat_handler, register_admin, conv_handler, cancel
+    callback_handler, boat_handler, register_admin, conv_handler, cancel,
+    start_quiz, handle_quiz_answer
 )
-import os
-from handlers.button_handler import start_quiz, handle_quiz_answer
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ContextTypes
-from bookings_storage import delete_booking
 from handlers.utils import load_admins
+from bookings_storage import delete_booking
+import os
 import json
-from telegram.ext import MessageHandler, filters
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-import os
-
-app = FastAPI()
-
-@app.get("/")
-async def serve_webapp():
-    return FileResponse("index.html")
-
+application = Application.builder().token(TOKEN).build()
 application = Application.builder().token(TOKEN).build()
 async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = json.loads(update.message.web_app_data.data)  # {"boat": "blue"}
@@ -80,3 +72,30 @@ application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$")
 application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
 application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
 application.add_handler(callback_handler)  # <-- обязательно в самом конце
+app = FastAPI()
+
+@app.get("/")
+def serve_webapp():
+    return FileResponse("index.html")
+
+# Обработка данных из Web App
+from telegram import Update
+async def handle_webapp_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = json.loads(update.message.web_app_data.data)
+    await update.message.reply_text(f"✅ Вы выбрали лодку: {data['boat']}")
+
+# Запуск
+if __name__ == "__main__":
+    import uvicorn
+    import asyncio
+
+    async def run_all():
+        await application.initialize()
+        await application.start()
+        print("✅ Telegram бот запущен")
+
+    loop = asyncio.get_event_loop()
+    loop.create_task(run_all())
+
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
