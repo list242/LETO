@@ -10,7 +10,6 @@ from handlers.button_handler import (
 )
 from handlers.utils import load_admins
 from bookings_storage import delete_booking
-from pathlib import Path
 import os
 import json
 
@@ -26,8 +25,8 @@ app = FastAPI()
 
 @app.get("/")
 def serve_webapp():
-    path = Path(__file__).parent / "index.html"
-    return FileResponse(path)
+    return FileResponse("index.html")
+
 # Web App data handler
 async def handle_webapp_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = json.loads(update.message.web_app_data.data)
