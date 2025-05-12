@@ -218,7 +218,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=reply_markup
             )
         elif data.startswith("photo_"):
-            _, boat, direction = data.split("_")  # например photo_red_next
+            parts = data.split("_")
+            if len(parts) != 3:
+                await query.answer("⚠️ Неверный формат callback_data")
+                return
+
+            _, boat, direction = parts
             index_key = f"photo_{boat}_index"
 
             photos = boat_photos[boat]["photos"]
