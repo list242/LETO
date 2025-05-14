@@ -243,12 +243,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data[index_key] = current
 
             # Кнопки листания
+# Кнопки листания
             buttons = []
+
             if current > 0:
                 buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
+
             if current + 1 < len(photos):
                 buttons.append(InlineKeyboardButton("➡️ Вперёд", callback_data=f"photo_{boat}_next"))
-            buttons.append(InlineKeyboardButton("🏠 Меню", callback_data="back_to_start"))
+
+            # Добавляем кнопку «🏠 Меню» только на ПЕРВОЙ фотке
+            if current == 0:
+                buttons.insert(0, InlineKeyboardButton("🏠 Меню", callback_data="back_to_start"))
 
             await query.edit_message_media(
                 media=InputMediaPhoto(
