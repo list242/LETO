@@ -11,4 +11,4 @@ PyMuPDF
 sentence-transformers
 transformers
 faiss-cpu
-torch-cpu       # CPU-версия Torch, чтобы не тянуть CUDA
+torch      # CPU-версия Torch, чтобы не тянуть CUDA
