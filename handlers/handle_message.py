@@ -196,27 +196,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 )
         elif data == "back_to_start":
-            if context.bot_data.get(f"pending-{user_chat_id}"):
-                await query.answer("⏳ Ожидайте подтверждения от администратора.")
-                return
-            keyboard = []
-            if get_booking(user_chat_id):
+            await query.answer()
 
-                keyboard.append([InlineKeyboardButton("📌 Моя запись", callback_data="my_booking")])
+            # Удаляем сообщение (если это фото, оно не редактируется текстом)
+            try:
+                await query.message.delete()
+            except Exception as e:
+                print("⚠️ Не удалось удалить сообщение:", e)
 
-            else:
-                keyboard.append([InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")])
+            keyboard = [
+                [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+                [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
+                [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
+                [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+                [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+            ]
 
-            keyboard.append([InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")])
-            keyboard.append([InlineKeyboardButton("ℹ️ Помощь", callback_data="help")])
-            keyboard.append([InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")])
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            await query.edit_message_text(
-                "👋 Добро пожаловать! Выберите один из пунктов ниже:", 
-                reply_markup=reply_markup
+            await context.bot.send_message(
+                chat_id=query.from_user.id,
+                text="👋 Добро пожаловать! Выберите один из пунктов ниже:",
+                reply_markup=InlineKeyboardMarkup(keyboard)
             )
+
         elif data.startswith("photo_"):
             parts = data.split("_")
             if len(parts) != 3:
