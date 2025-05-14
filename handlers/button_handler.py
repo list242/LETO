@@ -62,6 +62,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
     [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
     [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+    [InlineKeyboardButton("⚙ Инструктаж", callback_data="instr")],
+    [InlineKeyboardButton("⏺ Нейросеть",  callback_data="qa_start")],
     ]
 
 
