@@ -13,6 +13,8 @@ from bookings_storage import save_booking_to_file, delete_booking, get_booking, 
 from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone, get_taken_slots
 SELECTING_TIME = range(3)
 ADMIN_FILE = "admins.json"
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
 
 quiz_questions = [
     {"question": "🦺 Нужно ли надевать спасательный жилет перед выходом?", "options": ["Да, я же не рыба", "Нет, я бессмертный"], "correct": 0},
@@ -144,7 +146,8 @@ async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
         [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-        [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+        [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
+        [InlineKeyboardButton("🤖 Нейросеть",     callback_data="qa_start")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
