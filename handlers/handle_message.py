@@ -58,6 +58,39 @@ from yclients_api import (
     get_yclients_bookings,
     DEFAULT_STAFF_ID,
 )
+def get_weather_description(weather: dict) -> str:
+    temp = weather.get("temp", "—")
+    wind = weather.get("wind", "—")
+    rain = weather.get("rain", False)
+
+    if temp == "—":
+        temp_desc = "Температура: неизвестна 🌡"
+    elif temp < 10:
+        temp_desc = f"Температура: {temp}°C — холодно, лучше надеть тёплую куртку 🧥"
+    elif 10 <= temp < 18:
+        temp_desc = f"Температура: {temp}°C — прохладно, пригодится лёгкая куртка 🌤"
+    elif 18 <= temp < 25:
+        temp_desc = f"Температура: {temp}°C — комфортно, отличная погода для прогулки 🚤"
+    else:
+        temp_desc = f"Температура: {temp}°C — жарко, не забудьте воду и головной убор ☀️"
+
+    if wind == "—":
+        wind_desc = "Ветер: неизвестен 🌬"
+    elif wind < 3:
+        wind_desc = f"Ветер: {wind} м/с — почти штиль, вода как зеркало 🪞"
+    elif 3 <= wind < 6:
+        wind_desc = f"Ветер: {wind} м/с — лёгкий ветерок, прогулка будет приятной 🛶"
+    elif 6 <= wind < 10:
+        wind_desc = f"Ветер: {wind} м/с — немного ветрено, стоит быть аккуратнее 🚩"
+    else:
+        wind_desc = f"Ветер: {wind} м/с — сильный ветер, лучше не выходить на воду 🌪"
+
+    if rain:
+        rain_desc = "Осадки: возможны — захвати дождевик, но не теряй оптимизм! 🌧"
+    else:
+        rain_desc = "Осадки: не ожидаются, день будет отличным ☀️"
+
+    return f"{temp_desc}\n{wind_desc}\n{rain_desc}"
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -107,15 +140,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Получаем прогноз погоды для выбранной даты
             weather = get_weather_for_date(selected_date)
 
-            weather_text = (
-                f"📅 Вы выбрали {selected_date}\n"
-                f"🌡️ Температура: {weather['temp']}°C\n"
-                f"💨 Ветер: {weather['wind']} м/с\n"
-            )
-            if weather["rain"]:
-                weather_text += "🌧️ Осадки: возможны\n"
+            weather_text = f"📅 Вы выбрали дату: {selected_date}\n\n"
+            weather_text += get_weather_description(weather)
+            weather_text += "\n\nТеперь выберите время:"
 
-            weather_text += "\nТеперь выберите время:"
 
             time_slots = [
                 "11:00 - 12:30",
