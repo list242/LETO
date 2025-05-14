@@ -12,8 +12,9 @@ import faiss
 import numpy as np
 
 # 1) Конфиги путей и моделей
-TXT_PATH    = Path("data") / "instrukcia.txt"
-PDF_PATH    = Path("data") / "instrukcia.pdf"
+BASE = Path(__file__).resolve().parent
+TXT_PATH = BASE / "data" / "instrukcia.txt"
+PDF_PATH = BASE / "data" / "instrukcia.pdf"
 PICKLE_CH   = Path("data") / "chunks.pkl"
 EMB_PATH    = Path("data") / "embeddings.npy"
 INDEX_PATH  = Path("data") / "index.faiss"

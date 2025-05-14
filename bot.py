@@ -12,6 +12,7 @@ from bookings_storage import delete_booking
 from handlers.utils import load_admins
 import json
 from telegram.ext import MessageHandler, filters
+from qa_service import answer_question
 TOKEN = "7933616069:AAE1rIpYDIehi3h5gYFU7UQizeYhCifbFRk"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
@@ -22,6 +23,28 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     boat = data.get("boat")
     await update.message.reply_text(f"✅ Вы выбрали лодку: {boat.capitalize()}")
 # Новый обработчик одобрения/отклонения заявок
+# ========================================
+# QA: вход в режим и обработка вопросов
+# ========================================
+async def qa_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    # переключаем флаг в user_data
+    context.user_data["qa_mode"] = True
+    await query.edit_message_text(
+        "🤖 Вы вошли в режим нейросети. Просто задайте любой вопрос."
+    )
+
+async def qa_handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data.get("qa_mode"):
+        return  # передаём управление другим хендлерам
+
+    question = update.message.text
+    answer, score = answer_question(question)
+    await update.message.reply_text(f"Ответ: {answer}\n(уверенность {score:.2f})")
+    # по желанию: убрать флаг и выйти из режима после одного вопроса
+    # context.user_data.pop("qa_mode", None)
+
 async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -58,6 +81,17 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
         photo = update.message.photo[-1]  # Самое большое разрешение
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
+application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
+# регистрация QA-режима
+application.add_handler(
+    CallbackQueryHandler(qa_start, pattern="^qa_start$")
+)
+# перехват обычного текста в QA-режиме
+from telegram.ext import filters, MessageHandler
+application.add_handler(
+    MessageHandler(filters.TEXT & ~filters.COMMAND, qa_handle_message)
+)
+
 application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
