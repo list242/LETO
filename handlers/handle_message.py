@@ -5,7 +5,6 @@ import calendar
 from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import ContextTypes
-
 from handlers.utils import (
     generate_date_keyboard,
     notify_admin,
@@ -444,3 +443,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["booking_message_id"] = query.message.message_id
 
             return ENTERING_NAME
+from handlers.qa_search import search_answer
+async def handle_text_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_question = update.message.text.strip()
+    answer = search_answer(user_question)
+    await update.message.reply_text(answer)
