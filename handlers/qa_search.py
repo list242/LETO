@@ -81,16 +81,20 @@ RULES_TEXT = """
 """
 
 def search_answer(question: str) -> str:
-    keywords = re.findall(r'\w+', question.lower())
-    matches = []
+    question = question.lower()
+    keywords = set(re.findall(r'\b\w+\b', question))
 
-    for paragraph in RULES_TEXT.split('\n\n'):
-        score = sum(1 for word in keywords if word in paragraph.lower())
-        if score > 0:
-            matches.append((score, paragraph))
+    best_score = 0
+    best_paragraph = None
 
-    if not matches:
-        return "Извините, я не нашёл ответа на этот вопрос в правилах."
+    for paragraph in RULES_TEXT.split('\n'):
+        words = set(re.findall(r'\b\w+\b', paragraph.lower()))
+        score = len(keywords & words)
+        if score > best_score:
+            best_score = score
+            best_paragraph = paragraph.strip()
 
-    matches.sort(reverse=True)
-    return matches[0][1][:1000]  # ограничим длину ответа
+    if best_score == 0 or not best_paragraph:
+        return "Я не нашёл подходящего ответа в правилах. Пожалуйста, уточните вопрос."
+
+    return best_paragraph
