@@ -283,7 +283,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # Добавляем кнопку «🏠 Меню» только на ПЕРВОЙ фотке
             if current == 0:
-                buttons.insert(0, InlineKeyboardButton("🏠 Меню", callback_data="back_to_start"))
+                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
 
             await query.edit_message_media(
                 media=InputMediaPhoto(
