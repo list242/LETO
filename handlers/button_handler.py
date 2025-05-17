@@ -8,7 +8,6 @@ import calendar
 #from handlers.handle_message import handle_message  # ✅ Больше нет циклического импорта!
 from handlers.handle_message import handle_message
   # ✅ Правильный импорт 
-from telegram import WebAppInfo
 from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
 from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone, get_taken_slots
 SELECTING_TIME = range(3)
@@ -59,7 +58,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     keyboard = [
-    [InlineKeyboardButton("🚤 Выбор лодки", web_app=WebAppInfo(url="https://leto-production.up.railway.app/"))],
+    [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
     [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
     [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
     # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],

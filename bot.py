@@ -23,10 +23,6 @@ if not TOKEN:
 application = Application.builder().token(TOKEN).build()
 
 # Обработчик данных из WebApp
-async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = json.loads(update.message.web_app_data.data)
-    boat = data.get("boat")
-    await update.message.reply_text(f"✅ Вы выбрали лодку: {boat.capitalize()}")
 
 # Обработчик одобрения/отклонения заявок
 async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -59,7 +55,6 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Регистрация обработчиков
 application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
-application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 
 application.add_handler(start_handler)
