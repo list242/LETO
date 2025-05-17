@@ -245,7 +245,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="👋 Добро пожаловать! Выберите один из пунктов ниже:",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
-            await query.answer(f"data = {query.data}")
 
         elif data.startswith("photo_"):
             parts = data.split("_")
@@ -333,10 +332,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("⚪ Белая", callback_data="photo_white_start")],
                 [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
             ]
-            await query.edit_message_text(
-                text="📷 Фото лодок:\nВыберите цвет лодки ниже",
+
+            await query.edit_message_media(
+                media=InputMediaPhoto(
+                    media="AgACAgIAAxkBAAIJ1WgiSJ4Y8afXpPIGFJdNIZmIgQABuQAC1u4xG4LCEElG9w_nn7B3XAEAAwIAA3gAAzYE",  # превью-фото
+                    caption="📷 Фото лодок:\nВыберите цвет лодки ниже"
+                ),
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
+
 
 
         elif data == "forward":
