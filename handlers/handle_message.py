@@ -236,8 +236,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
                 [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
                 [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
-                [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-                [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+                # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+                # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
             ]
 
             await context.bot.send_message(
@@ -357,17 +357,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"Вы выбрали лодку {boat}. Теперь выберите дату:",
                 reply_markup=reply_markup
             )
-        elif data == "faq":
-                keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await query.edit_message_text(
-                    "📌 Частые вопросы:\n"
-                    "- 📅 Можно ли перенести бронь?\n"
-                    "- ⚓ Какие условия аренды?\n"
-                    "- 👶 Есть ли ограничения по возрасту?\n"
-                    "🔙 Для возврата в меню нажмите кнопку ниже.",
-                    reply_markup=reply_markup
-                )
+        # elif data == "faq":
+        #         keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+        #         reply_markup = InlineKeyboardMarkup(keyboard)
+        #         await query.edit_message_text(
+        #             "📌 Частые вопросы:\n"
+        #             "- 📅 Можно ли перенести бронь?\n"
+        #             "- ⚓ Какие условия аренды?\n"
+        #             "- 👶 Есть ли ограничения по возрасту?\n"
+        #             "🔙 Для возврата в меню нажмите кнопку ниже.",
+        #             reply_markup=reply_markup
+        #         )
         elif data == "my_booking":
             booking = get_booking(user_chat_id)
             if not booking:
@@ -396,18 +396,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(message, reply_markup=reply_markup)
 
         # Перенос бронирования
-
-        elif data == "help":
-                keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await query.edit_message_text(
-                    "❓ Раздел помощи:\n"
-                    "1️⃣ Как забронировать лодку?\n"
-                    "2️⃣ Какие есть правила пользования лодкой?\n"
-                    "3️⃣ Как отменить бронь?\n"
-                    "🔙 Для возврата в меню нажмите кнопку ниже.",
-                    reply_markup=reply_markup
-                )
+        
+        # elif data == "help":
+        #         keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+        #         reply_markup = InlineKeyboardMarkup(keyboard)
+        #         await query.edit_message_text(
+        #             "❓ Раздел помощи:\n"
+        #             "1️⃣ Как забронировать лодку?\n"
+        #             "2️⃣ Какие есть правила пользования лодкой?\n"
+        #             "3️⃣ Как отменить бронь?\n"
+        #             "🔙 Для возврата в меню нажмите кнопку ниже.",
+        #             reply_markup=reply_markup
+        #         )
         
         elif data.startswith("time-"):
             if get_booking(user_chat_id):
