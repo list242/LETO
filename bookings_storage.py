@@ -18,12 +18,10 @@ def save_booking_to_file(user_id: int, booking_data: dict):
                 except json.JSONDecodeError:
                     print("⚠️ bookings.json повреждён или пуст — перезаписываем.")
                     data = {}
-
         data[str(user_id)] = booking_data
 
         with open(BOOKINGS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-
         print(f"✅ Бронь пользователя {user_id} сохранена.")
     except Exception as e:
         print(f"❌ Ошибка при сохранении брони: {e}")

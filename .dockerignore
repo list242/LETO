@@ -1,6 +1,0 @@
-__pycache__/
-*.pyc
-.git/
-data/           # исключаем PDF, кэши и т.п.
-bookings.json
-.venv/
