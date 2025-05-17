@@ -245,6 +245,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="👋 Добро пожаловать! Выберите один из пунктов ниже:",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
+        elif data == "boat_selection":
+            # Вернуться к выбору лодки
+            keyboard = [
+                [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue_start")],
+                [InlineKeyboardButton("🔴 Красная", callback_data="photo_red_start")],
+                [InlineKeyboardButton("⚪ Белая",  callback_data="photo_white_start")],
+            ]
+            await query.edit_message_text(
+                text="📷 Фото лодок:\nВыберите цвет лодки ниже",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
 
         elif data.startswith("photo_"):
             parts = data.split("_")
@@ -259,7 +270,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             title = boat_photos[boat]["name"]
             current = context.user_data.get(index_key, 0)
 
-            # Считаем новое значение current
             if direction == "start":
                 current = 0
             elif direction == "next" and current + 1 < len(photos):
@@ -272,43 +282,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             context.user_data[index_key] = current
 
-            # ============ Формируем кнопки ============
+            # --- КНОПКИ ---
             buttons = []
 
-            # 1) Назад. Если это первая фотка — идём в выбор цвета лодки,
-            # иначе — показываем предыдущую
+            # Кнопка «Назад»: если первое фото — вернуться к выбору лодки
             if current == 0:
-                buttons.append(
-                    InlineKeyboardButton(
-                        "⬅️ Назад",
-                        callback_data="boat_selection"   # вот он — ваш callback для возврата к цветам
-                    )
-                )
+                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data="boat_selection"))
             else:
-                buttons.append(
-                    InlineKeyboardButton(
-                        "⬅️ Назад",
-                        callback_data=f"photo_{boat}_prev"
-                    )
-                )
+                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
 
-            # 2) Вперёд — только если ещё есть куда листать
+            # Кнопка «Вперёд» (если есть следующее фото)
             if current + 1 < len(photos):
-                buttons.append(
-                    InlineKeyboardButton(
-                        "➡️ Вперёд",
-                        callback_data=f"photo_{boat}_next"
-                    )
-                )
+                buttons.append(InlineKeyboardButton("➡️ Вперёд", callback_data=f"photo_{boat}_next"))
 
-            # Отправляем обновлённый медиа-месседж
             await query.edit_message_media(
                 media=InputMediaPhoto(
                     media=photos[current],
-                    caption=f"{title} ({current+1}/{len(photos)})"
+                    caption=f"{title} ({current + 1}/{len(photos)})"
                 ),
                 reply_markup=InlineKeyboardMarkup([buttons])
             )
+
 
         elif data == "show_boat_photos":
             await query.answer()
