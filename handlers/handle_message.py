@@ -259,6 +259,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             title = boat_photos[boat]["name"]
             current = context.user_data.get(index_key, 0)
 
+            # Считаем новое значение current
             if direction == "start":
                 current = 0
             elif direction == "next" and current + 1 < len(photos):
@@ -271,24 +272,40 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             context.user_data[index_key] = current
 
-            # Кнопки листания
-# Кнопки листания
+            # ============ Формируем кнопки ============
             buttons = []
 
-            if current > 0:
-                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
-
-            if current + 1 < len(photos):
-                buttons.append(InlineKeyboardButton("➡️ Вперёд", callback_data=f"photo_{boat}_next"))
-
-            # Добавляем кнопку «🏠 Меню» только на ПЕРВОЙ фотке
+            # 1) Назад. Если это первая фотка — идём в выбор цвета лодки,
+            # иначе — показываем предыдущую
             if current == 0:
-                buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"photo_{boat}_prev"))
+                buttons.append(
+                    InlineKeyboardButton(
+                        "⬅️ Назад",
+                        callback_data="boat_selection"   # вот он — ваш callback для возврата к цветам
+                    )
+                )
+            else:
+                buttons.append(
+                    InlineKeyboardButton(
+                        "⬅️ Назад",
+                        callback_data=f"photo_{boat}_prev"
+                    )
+                )
 
+            # 2) Вперёд — только если ещё есть куда листать
+            if current + 1 < len(photos):
+                buttons.append(
+                    InlineKeyboardButton(
+                        "➡️ Вперёд",
+                        callback_data=f"photo_{boat}_next"
+                    )
+                )
+
+            # Отправляем обновлённый медиа-месседж
             await query.edit_message_media(
                 media=InputMediaPhoto(
                     media=photos[current],
-                    caption=f"{title} ({current + 1}/{len(photos)})"
+                    caption=f"{title} ({current+1}/{len(photos)})"
                 ),
                 reply_markup=InlineKeyboardMarkup([buttons])
             )
