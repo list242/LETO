@@ -320,11 +320,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue_start")],
                     [InlineKeyboardButton("🔴 Красная", callback_data="photo_red_start")],
-                    [InlineKeyboardButton("⚪ Белая", callback_data="photophoto_white_start_white")],
+                    [InlineKeyboardButton("⚪ Белая", callback_data="photo_white_start")],
                     [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
                 ])
             )
 
+        elif data == "boat_selection":
+            keyboard = [
+                [InlineKeyboardButton("🔵 Синяя", callback_data="photo_blue_start")],
+                [InlineKeyboardButton("🔴 Красная", callback_data="photo_red_start")],
+                [InlineKeyboardButton("⚪ Белая", callback_data="photo_white_start")],
+                [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
+            ]
+            await query.edit_message_text(
+                text="📷 Фото лодок:\nВыберите цвет лодки ниже",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
 
 
         elif data == "forward":
