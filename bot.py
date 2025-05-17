@@ -68,9 +68,8 @@ application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler("start_quiz", start_quiz))
 application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
-application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$")) # <-- обязательно в самом конце
-application.add_handler(CallbackQueryHandler(callback_handler))
-application.add_handler(callback_handler)  # обязательно последний
+application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
+application.add_handler(callback_handler)  # <-- обязательно в самом конце
 
 if __name__ == "__main__":
     application.run_polling()
