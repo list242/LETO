@@ -61,11 +61,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
     [InlineKeyboardButton("🚤 Выбор лодки", web_app=WebAppInfo(url="https://leto-production.up.railway.app/"))],
     [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-    [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
-    [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-    [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
-    [InlineKeyboardButton("⚙ Инструктаж", callback_data="instr")],
-    [InlineKeyboardButton("⏺ Нейросеть",  callback_data="qa_start")],
+    [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
+    # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+    # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
     ]
 
 
@@ -144,10 +142,10 @@ async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Возвращаем пользователя в главное меню
     keyboard = [
-        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
-        [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-        [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
-        [InlineKeyboardButton("🤖 Нейросеть",     callback_data="qa_start")]
+        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")]
+        # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
+        # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
+        # [InlineKeyboardButton("🤖 Нейросеть",     callback_data="qa_start")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
@@ -174,33 +172,33 @@ conv_handler = ConversationHandler(
     ],
     per_chat=True  # Заменил на per_chat вместо per_message
 )
-async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        "📌 Частые вопросы:\n"
-        "- 📅 Можно ли перенести бронь?\n"
-        "- ⚓ Какие условия аренды?\n"
-        "- 👶 Есть ли ограничения по возрасту?\n"
-        "🔙 Для возврата в меню нажмите кнопку .",
-        reply_markup=reply_markup
-    )
+# async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     query = update.callback_query
+#     await query.answer()
+#     keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+#     reply_markup = InlineKeyboardMarkup(keyboard)
+#     await query.edit_message_text(
+#         "📌 Частые вопросы:\n"
+#         "- 📅 Можно ли перенести бронь?\n"
+#         "- ⚓ Какие условия аренды?\n"
+#         "- 👶 Есть ли ограничения по возрасту?\n"
+#         "🔙 Для возврата в меню нажмите кнопку .",
+#         reply_markup=reply_markup
+#     )
 
-async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        "❓ Раздел помощи:\n"
-        "1️⃣ Как забронировать лодку?\n"
-        "2️⃣ Какие есть правила пользования лодкой?\n"
-        "3️⃣ Как отменить бронь?\n"
-        "🔙 Для возврата в меню нажмите кнопку ниже.",
-        reply_markup=reply_markup
-    )
+# async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     query = update.callback_query
+#     await query.answer()
+#     keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
+#     reply_markup = InlineKeyboardMarkup(keyboard)
+#     await query.edit_message_text(
+#         "❓ Раздел помощи:\n"
+#         "1️⃣ Как забронировать лодку?\n"
+#         "2️⃣ Какие есть правила пользования лодкой?\n"
+#         "3️⃣ Как отменить бронь?\n"
+#         "🔙 Для возврата в меню нажмите кнопку ниже.",
+#         reply_markup=reply_markup
+#     )
 async def start_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -299,8 +297,8 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков
 start_handler = CommandHandler("start", start)
-faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
-help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
+# faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
+# help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
 #back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
 callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
