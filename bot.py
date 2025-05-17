@@ -1,7 +1,9 @@
 # bot.py
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from handlers.button_handler import (
-    start_handler, faq_handler, help_handler,
+    start_handler, 
+    # faq_handler, 
+    # help_handler,
     callback_handler, boat_handler, register_admin, conv_handler, cancel,
     start_quiz, handle_quiz_answer
 )
@@ -62,8 +64,8 @@ application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
-application.add_handler(faq_handler)
-application.add_handler(help_handler)
+# application.add_handler(faq_handler)
+# application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler("start_quiz", start_quiz))
