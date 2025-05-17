@@ -11,6 +11,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from bookings_storage import delete_booking
 from handlers.utils import load_admins
+from handlers.handle_message import handle_text_question
 import os
 import json
 
@@ -67,6 +68,6 @@ application.add_handler(CommandHandler("start_quiz", start_quiz))
 application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
 application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
 application.add_handler(callback_handler)  # <-- обязательно в самом конце
-
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_question))
 if __name__ == "__main__":
     application.run_polling()
