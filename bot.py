@@ -4,7 +4,9 @@ from handlers.button_handler import (
     start_handler, 
     # faq_handler, 
     # help_handler,
-    callback_handler, boat_handler, register_admin, conv_handler, cancel,
+    callback_handler, boat_handler, register_admin, 
+    #conv_handler, 
+    #cancel,
     start_quiz, handle_quiz_answer
 )
 from telegram import Update
@@ -63,7 +65,7 @@ application.add_handler(boat_handler)
 # application.add_handler(faq_handler)
 # application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
-application.add_handler(conv_handler)
+#application.add_handler(conv_handler)
 application.add_handler(CommandHandler("start_quiz", start_quiz))
 application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
 application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
