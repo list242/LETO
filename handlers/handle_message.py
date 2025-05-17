@@ -245,6 +245,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="👋 Добро пожаловать! Выберите один из пунктов ниже:",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
+            await query.answer(f"data = {query.data}")
 
         elif data.startswith("photo_"):
             parts = data.split("_")
