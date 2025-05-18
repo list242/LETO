@@ -26,9 +26,16 @@ FAQ = [
 
 def search_answer(question: str) -> str:
     q = question.lower()
+    best_score = 0
+    best_answer = None
 
     for keywords, answer in FAQ:
-        if any(word in q for word in keywords):
-            return answer
+        score = sum(1 for word in keywords if word in q)
+        if score > best_score:
+            best_score = score
+            best_answer = answer
 
-    return "Я не нашёл подходящего ответа в правилах. Пожалуйста, уточните вопрос."
+    if best_score == 0:
+        return "Я не нашёл подходящего ответа в правилах. Пожалуйста, уточните вопрос."
+
+    return best_answer
