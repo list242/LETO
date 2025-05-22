@@ -2,7 +2,7 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from handlers.button_handler import (
     start_handler, 
-    faq_handler, 
+    # faq_handler, 
     # help_handler,
     callback_handler, boat_handler, register_admin, 
     #conv_handler, 
@@ -55,7 +55,6 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
         photo = update.message.photo[-1]
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
-application.add_handler(faq_handler)
 # Регистрация обработчиков
 application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
