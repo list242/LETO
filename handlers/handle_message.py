@@ -19,8 +19,8 @@ from handlers.utils import (
 boat_photos = {
     "red": {
         "name": "🔴 Красная лодка",
-        "photos": ["AgACAgIAAxkBAAIJ7mgiUEYejU9rCnWd8yx8ysmDNmQhAAL57jEbgsIQSWOL_YKwFvavAQADAgADeAADNgQ",
-                   "AgACAgIAAxkBAAILmmgvoQwSdGbRLV8B2eHeQDxMYe3VAALO7jEbVK2BSZBrnRn86OvnAQADAgADeQADNgQ",
+        "photos": ["AgACAgIAAxkBAAILmmgvoQwSdGbRLV8B2eHeQDxMYe3VAALO7jEbVK2BSZBrnRn86OvnAQADAgADeQADNgQ",
+                    "AgACAgIAAxkBAAIJ7mgiUEYejU9rCnWd8yx8ysmDNmQhAAL57jEbgsIQSWOL_YKwFvavAQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ6GgiUD5NLqLoj5Un3nugAdS0WfngAAL37jEbgsIQSbEtTl7AFoCcAQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ6mgiUEGWfGwdBJBIRqriTNeD-8vBAAL47jEbgsIQSWYCAAG1BP1zzgEAAwIAA3gAAzYE",
                    "AgACAgIAAxkBAAIJ7GgiUERUIu_cgof8ufLmRkowV1pGAALv7jEbnVAYSddk2aHgv3W0AQADAgADeAADNgQ",
@@ -320,7 +320,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer()
             await query.edit_message_media(
                 media=InputMediaPhoto(
-                    media="AgACAgIAAxkBAAIJ1WgiSJ4Y8afXpPIGFJdNIZmIgQABuQAC1u4xG4LCEElG9w_nn7B3XAEAAwIAA3gAAzYE",
+                    media="AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ",
                     caption="📷 Фото лодок:\n\nВыберите лодку ниже"
                 ),
                 reply_markup=InlineKeyboardMarkup([
@@ -341,7 +341,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await query.edit_message_media(
                 media=InputMediaPhoto(
-                    media="AgACAgIAAxkBAAIJ1WgiSJ4Y8afXpPIGFJdNIZmIgQABuQAC1u4xG4LCEElG9w_nn7B3XAEAAwIAA3gAAzYE",  # превью-фото
+                    media="AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ",  # превью-фото
                     caption="📷 Фото лодок:\nВыберите цвет лодки ниже"
                 ),
                 reply_markup=InlineKeyboardMarkup(keyboard)
