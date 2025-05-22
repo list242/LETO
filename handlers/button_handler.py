@@ -56,21 +56,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif update.callback_query:
             await update.callback_query.answer("⏳ Ожидайте подтверждения от администратора.", show_alert=True)
         return
+    start_photo_file_id = "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
 
     keyboard = [
-    [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
-    [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-    [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
-    # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-    # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
+        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+        [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
+        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
+
     if update.message:
-        await update.message.reply_text("Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫", reply_markup=reply_markup)
+        await update.message.reply_photo(
+            photo=start_photo_file_id,
+            caption="Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
+            reply_markup=reply_markup
+        )
     elif update.callback_query:
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text("Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫", reply_markup=reply_markup)
+        await update.callback_query.answer()
+        await update.callback_query.message.delete()
+        await context.bot.send_photo(
+            chat_id=update.effective_user.id,
+            photo=start_photo_file_id,
+            caption="Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
+            reply_markup=reply_markup
+        )
+
 
 async def register_admin(update: Update, context):
     chat_id = update.message.chat_id
