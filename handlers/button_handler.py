@@ -64,15 +64,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
     # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
     ]
-
-
     reply_markup = InlineKeyboardMarkup(keyboard)
     if update.message:
-        await update.message.reply_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
+        await update.message.reply_text("Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫", reply_markup=reply_markup)
     elif update.callback_query:
         query = update.callback_query
         await query.answer()
-        await query.edit_message_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
+        await query.edit_message_text("Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫", reply_markup=reply_markup)
 
 async def register_admin(update: Update, context):
     chat_id = update.message.chat_id
@@ -155,22 +153,22 @@ async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     return ConversationHandler.END  # Завершаем диалог
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Процесс бронирования отменён.")
-    return ConversationHandler.END  # Завершаем диалог
-conv_handler = ConversationHandler(
-    entry_points=[MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],  # Исправлено на MessageHandler
-    states={
-        SELECTING_TIME: [CallbackQueryHandler(handle_message)],
-        ENTERING_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],
-        ENTERING_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_phone)]
-    },
-    fallbacks=[
-        CallbackQueryHandler(handle_back, pattern="^back_to_start$"),
-        CommandHandler("cancel", cancel)
-    ],
-    per_chat=True  # Заменил на per_chat вместо per_message
-)
+# async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     await update.message.reply_text("Процесс бронирования отменён.")
+#     return ConversationHandler.END  # Завершаем диалог
+# conv_handler = ConversationHandler(
+#     entry_points=[MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],  # Исправлено на MessageHandler
+#     states={
+#         SELECTING_TIME: [CallbackQueryHandler(handle_message)],
+#         ENTERING_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_name)],
+#         ENTERING_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, enter_phone)]
+#     },
+#     fallbacks=[
+#         CallbackQueryHandler(handle_back, pattern="^back_to_start$"),
+#         CommandHandler("cancel", cancel)
+#     ],
+#     per_chat=True  # Заменил на per_chat вместо per_message
+# )
 # async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     query = update.callback_query
 #     await query.answer()
