@@ -166,6 +166,7 @@ def get_weather_description(weather: dict) -> str:
     return f"{temp_desc}\n{wind_desc}\n{rain_desc}"
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(f"[DEBUG] Callback received: {update.callback_query.data}")
     query = update.callback_query
     
     if query:
