@@ -225,25 +225,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif data == "back_to_start":
             await query.answer()
 
-            # Удаляем сообщение (если это фото, оно не редактируется текстом)
             try:
                 await query.message.delete()
             except Exception as e:
                 print("⚠️ Не удалось удалить сообщение:", e)
 
+            start_photo_file_id = "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+
             keyboard = [
                 [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
                 [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-                [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
-                # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-                # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")]
+                [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
             ]
 
-            await context.bot.send_message(
+            await context.bot.send_photo(
                 chat_id=query.from_user.id,
-                text="👋 Добро пожаловать! Выберите один из пунктов ниже:",
+                photo=start_photo_file_id,
+                caption="Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
                 reply_markup=InlineKeyboardMarkup(keyboard)
-            )
+        )
+
 
         elif data.startswith("photo_"):
             parts = data.split("_")
