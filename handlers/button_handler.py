@@ -319,6 +319,7 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.edit_message_text(result_text, reply_markup=reply_markup)
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков
+faq_handler = CallbackQueryHandler(faq_callback, pattern="^faq$")
 start_handler = CommandHandler("start", start)
 # faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
 # help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
@@ -327,4 +328,3 @@ callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
 boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
 #approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")
-faq_handler = CallbackQueryHandler(faq_callback, pattern="^faq$")
