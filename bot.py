@@ -1,43 +1,33 @@
-import os
-import json
-from fastapi import FastAPI, Request
-from telegram import Update
-from telegram.ext import (
-    Application, CallbackQueryHandler, CommandHandler, MessageHandler,
-    ContextTypes, filters
-)
-
+# bot.py
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from handlers.button_handler import (
-    start_handler, callback_handler, boat_handler,
-    register_admin, start_quiz, handle_quiz_answer
+    start_handler, 
+    # faq_handler, 
+    # help_handler,
+    callback_handler, boat_handler, register_admin, 
+    #conv_handler, 
+    #cancel,
+    start_quiz, handle_quiz_answer
 )
-from handlers.handle_message import handle_text_question
+from telegram import Update
+from telegram.ext import ContextTypes
 from bookings_storage import delete_booking
 from handlers.utils import load_admins
+from handlers.handle_message import handle_text_question
+import os
+import json
 
-# ───────────────────────────────
-# Инициализация бота и FastAPI
-# ───────────────────────────────
+# Токен бота берёTOKEN = os.getenv("BOT_TOKEN")
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден")
 
+# Инициализация приложения
 application = Application.builder().token(TOKEN).build()
-app = FastAPI()
 
-# ───────────────────────────────
-# Webhook endpoint
-# ───────────────────────────────
-@app.post("/webhook")
-async def webhook(request: Request):
-    data = await request.json()
-    update = Update.de_json(data, application.bot)
-    await application.update_queue.put(update)
-    return {"status": "ok"}
+# Обработчик данных из WebApp
 
-# ───────────────────────────────
-# Обработчик одобрения/отклонения заявки
-# ───────────────────────────────
+# Обработчик одобрения/отклонения заявок
 async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -60,41 +50,26 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.bot_data.pop(f"pending-{user_id}", None)
     context.bot_data.pop(f"booking_msg_id-{user_id}", None)
 
-# ───────────────────────────────
-# Получение file_id фото
-# ───────────────────────────────
+# Обработчик фотографий для получения file_id
 async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
         photo = update.message.photo[-1]
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
 
-# ───────────────────────────────
 # Регистрация обработчиков
-# ───────────────────────────────
 application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
+
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
+# application.add_handler(faq_handler)
+# application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
+#application.add_handler(conv_handler)
 application.add_handler(CommandHandler("start_quiz", start_quiz))
 application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
-application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
-application.add_handler(callback_handler)
+application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
+application.add_handler(callback_handler)  # <-- обязательно в самом конце
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_question))
-
-# ───────────────────────────────
-# Установка Webhook и запуск
-# ───────────────────────────────
 if __name__ == "__main__":
-    import asyncio
-
-    async def main():
-        # Установка webhook
-        webhook_url = "https://leto-pxzn.onrender.com/webhook"
-        await application.bot.set_webhook(webhook_url)
-
-        await application.initialize()
-        await application.start()
-        print("✅ Бот запущен через Webhook на Render.")
-
-    asyncio.run(main())
+    application.run_polling()
