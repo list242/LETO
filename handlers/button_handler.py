@@ -178,7 +178,7 @@ async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     per_chat=True  # Заменил на per_chat вместо per_message
 # )
 
-async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def faq_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
@@ -327,3 +327,4 @@ callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
 boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
 #approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")
+faq_handler = CallbackQueryHandler(faq_callback, pattern="^faq$")

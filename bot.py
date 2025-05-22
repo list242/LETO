@@ -63,6 +63,7 @@ application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(faq_handler)
+
 # application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
 #application.add_handler(conv_handler)
