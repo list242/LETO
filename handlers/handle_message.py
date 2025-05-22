@@ -20,15 +20,20 @@ boat_photos = {
     "red": {
         "name": "🔴 Красная лодка",
         "photos": ["AgACAgIAAxkBAAIJ7mgiUEYejU9rCnWd8yx8ysmDNmQhAAL57jEbgsIQSWOL_YKwFvavAQADAgADeAADNgQ",
-                   "AgACAgIAAxkBAAIJ5mgiUDoLoapGLQ8P7wwfsr82CmGuAAL27jEbgsIQSVVwksWQMSy0AQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAILmmgvoQwSdGbRLV8B2eHeQDxMYe3VAALO7jEbVK2BSZBrnRn86OvnAQADAgADeQADNgQ",
                    "AgACAgIAAxkBAAIJ6GgiUD5NLqLoj5Un3nugAdS0WfngAAL37jEbgsIQSbEtTl7AFoCcAQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ6mgiUEGWfGwdBJBIRqriTNeD-8vBAAL47jEbgsIQSWYCAAG1BP1zzgEAAwIAA3gAAzYE",
-                   "AgACAgIAAxkBAAIJ7GgiUERUIu_cgof8ufLmRkowV1pGAALv7jEbnVAYSddk2aHgv3W0AQADAgADeAADNgQ"
+                   "AgACAgIAAxkBAAIJ7GgiUERUIu_cgof8ufLmRkowV1pGAALv7jEbnVAYSddk2aHgv3W0AQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAILnGgvoRT5sR18zCgtDhdb0RuV6vSJAALP7jEbVK2BSdic7r0n4cilAQADAgADeQADNgQ",
+                   "AgACAgIAAxkBAAILnmgvoRtcZaiKgWYHu8O3pxC_vHT4AALQ7jEbVK2BSTnsVBcO3cDtAQADAgADeQADNgQ",
+                   "AgACAgIAAxkBAAILoGgvoSE2mFXzVFwr9NphFrLo88m9AAK67TEb-0-ASc1gliDJhp1IAQADAgADeQADNgQ"
                    ]
     },
     "blue": {
         "name": "🔵 Синяя лодка",
         "photos": ["AgACAgIAAxkBAAIJ8GgiUElXydOz_R9z48cvhP6BtT5eAAL67jEbgsIQSexV98cJYhdOAQADAgADeAADNgQ", 
+                   "AgACAgIAAxkBAAILk2gvoLzKWTNJXGs9hyDZqkPJLKNVAALL7jEbVK2BSQ2qqjSgXpCfAQADAgADeQADNgQ",
+                   "AgACAgIAAxkBAAILkWgvoLV6fd1aKMThNmO_57aPwbzIAALK7jEbVK2BSUhd53SS5TeiAQADAgADeQADNgQ",
                    "AgACAgIAAxkBAAIJ8mgiUE7NPZgAAVhr09ZZHdQZCU9j0QAC--4xG4LCEEmIYVaOPFt94QEAAwIAA3gAAzYE",
                    "AgACAgIAAxkBAAIJ9GgiUFFXrdawEuvENhkxpN9yhguxAAL87jEbgsIQSS9I60fWlkQiAQADAgADeAADNgQ"
                    ]
@@ -36,9 +41,10 @@ boat_photos = {
     "white": {
         "name": "⚪ Белая лодка",
         "photos": ["AgACAgIAAxkBAAIJ_mgiUGcwDUaZrp-AFltDMoZrgmlgAAII7zEbgsIQSe7owVRTdxdvAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAILlWgvoO0E9rCaHFtn_jowf1mSYcxtAALM7jEbVK2BSaHDZQ9rUqnJAQADAgADeQADNgQ",
                    "AgACAgIAAxkBAAIJ_GgiUGM2eU9j3JhmLNcuXNDSDs8FAAIH7zEbgsIQSdPzhY6HtFF-AQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ-mgiUF62Nood_-nB2l_Bh_j3jfAUAAIG7zEbgsIQScILOejghOD4AQADAgADeAADNgQ",
-                   "AgACAgIAAxkBAAIJ-GgiUFz5EncyEeUpmgiHfiZoZikGAAID7zEbgsIQSYUzXrXK97qIAQADAgADeAADNgQ",
+                   "AgACAgIAAxkBAAILlWgvoO0E9rCaHFtn_jowf1mSYcxtAALM7jEbVK2BSaHDZQ9rUqnJAQADAgADeQADNgQ",
                    "AgACAgIAAxkBAAIJ9mgiUFlzMDnE-YU-WoWFe3SVlWmiAAIC7zEbgsIQSblwoFwi98XSAQADAgADeAADNgQ"
                    ]
     }
