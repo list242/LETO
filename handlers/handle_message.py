@@ -16,6 +16,74 @@ from handlers.utils import (
     is_slot_taken_yclients,
     load_admins,
 )
+faq_data = {
+    0: {
+        "text": "📍 Наш маршрут проходит вдоль живописной набережной. Мы проезжаем ключевые достопримечательности и спокойные бухты.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    1: {
+        "text": "📍 Мы находимся на [причале CBRental], по адресу: г. Москва, Набережная Х, причал Y. Припарковаться можно рядом.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    2: {
+        "text": "🧍‍♂️ На каждой лодке удобно размещаются 4–5 человек. Для больших компаний — можно арендовать 2–3 лодки одновременно.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    3: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    4: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    5: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    6: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    7: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    8: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    9: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    10: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    11: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    12: {
+        "text": "💸 Цены указаны в разделе выбора лодки. Нажмите 'Выбор лодки' в главном меню, выберите лодку и ознакомьтесь с ценами перед бронированием.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    13: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    14: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    },
+    15: {
+        "text": "ℹ️ Ответ на этот вопрос будет добавлен позже.",
+        "photo": "AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ"
+    }
+}
+
+
 boat_photos = {
     "red": {
         "name": "🔴 Красная лодка",
@@ -183,6 +251,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text=weather_text,
                 reply_markup=reply_markup
             )
+        elif data.startswith("faq_"):
+            idx = int(data.split("_")[1])
+            faq = faq_data.get(idx)
+
+            if faq:
+                text = faq["text"]
+                photo = faq["photo"]
+                keyboard = [[InlineKeyboardButton("⬅️ Назад к вопросам", callback_data="faq")]]
+
+                try:
+                    await query.edit_message_media(
+                        media=InputMediaPhoto(media=photo, caption=text),
+                        reply_markup=InlineKeyboardMarkup(keyboard)
+                    )
+                except Exception as e:
+                    print("⚠️ Ошибка при показе FAQ с фото:", e)
+                    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+            else:
+                await query.edit_message_text("❓ Информация по этому вопросу пока не добавлена.")
 
 
         elif data == "go_back":
