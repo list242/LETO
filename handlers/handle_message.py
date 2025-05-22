@@ -251,6 +251,29 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text=weather_text,
                 reply_markup=reply_markup
             )
+        elif data == "faq":
+            faq_items = [
+                    "Какой маршрут",
+                    "Где вы находитесь",
+                    "Сколько человек помещается",
+                    "Можно ли алкоголь",
+                    "Хочу сделать предложение",
+                    "Хочу подарить цветы",
+                    "Я не умею управлять катером",
+                    "Что делать в случае плохой погоды",
+                    "Можно ли с детьми",
+                    "Как отменить бронь",
+                    "Как перенести бронь",
+                    "Можно ли с домашними животными",
+                    "Где увидеть цену",
+                    "Можно ли сразу 2 или 3 катера",
+                    "Можно ли арендовать для фотосессии",
+                    "Сколько аренда по времени"
+                ]
+            keyboard = [[InlineKeyboardButton(q, callback_data=f"faq_{i}")] for i, q in enumerate(faq_items)]
+            keyboard.append([InlineKeyboardButton("🏠 Назад в меню", callback_data="back_to_start")])
+            await query.edit_message_text("📌 Выберите интересующий вопрос:", reply_markup=InlineKeyboardMarkup(keyboard))
+
         elif data.startswith("faq_"):
             idx = int(data.split("_")[1])
             faq = faq_data.get(idx)

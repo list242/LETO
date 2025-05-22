@@ -36,36 +36,6 @@ def save_admins(admin_chat_ids):
 admin_chat_ids = load_admins()
 #admin_chat_ids = set()
 #RUSSIAN_DAY_ABBREVIATIONS = {0: "Пн",1: "Вт",2: "Ср",3: "Чт",4: "Пт",5: "Сб",6: "Вс"}
-async def faq_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    
-    # список вопросов — см. выше
-    faq_items = [
-    "Какой маршрут",
-    "Где вы находитесь",
-    "Сколько человек помещается",
-    "Можно ли алкоголь",
-    "Хочу сделать предложение",
-    "Хочу подарить цветы",
-    "Я не умею управлять катером",
-    "Что делать в случае плохой погоды",
-    "Можно ли с детьми",
-    "Как отменить бронь",
-    "Как перенести бронь",
-    "Можно ли с домашними животными",
-    "Где увидеть цену",
-    "Можно ли сразу 2 или 3 катера",
-    "Можно ли арендовать для фотосессии",
-    "Сколько аренда по времени"
-    ]
-    keyboard = [[InlineKeyboardButton(q, callback_data=f"faq_{i}")]
-                for i, q in enumerate(faq_items)]
-    keyboard.append([InlineKeyboardButton("🏠 Назад в меню", callback_data="back_to_start")])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text("📌 Выберите интересующий вопрос:", reply_markup=reply_markup)
-
 def format_date(date):
     day_name = RUSSIAN_DAY_ABBREVIATIONS[date.weekday()]  
     return f"{date.strftime('%d.%m.%Y')} ({day_name})"
@@ -317,7 +287,6 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.edit_message_text(result_text, reply_markup=reply_markup)
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков
-faq_handler = CallbackQueryHandler(faq_callback, pattern="^faq$")
 start_handler = CommandHandler("start", start)
 # faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
 # help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
