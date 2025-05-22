@@ -41,10 +41,6 @@ def format_date(date):
     day_name = RUSSIAN_DAY_ABBREVIATIONS[date.weekday()]  
     return f"{date.strftime('%d.%m.%Y')} ({day_name})"
 
-
-async def start(update: Update, context):
-    user_name = update.message.from_user.first_name
-    await update.message.reply_text(f"Привет, {user_name}! Я бот для бронирования лодок.")
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_chat_id = update.effective_user.id
     # ❗ Проверка: если есть активный запрос (перенос, отмена, ожидание)
@@ -61,7 +57,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
         [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
+        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
+        [InlineKeyboardButton("❓ Часто задаваемые вопросы", callback_data="faq")]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -180,19 +177,37 @@ async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     ],
 #     per_chat=True  # Заменил на per_chat вместо per_message
 # )
-# async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     query = update.callback_query
-#     await query.answer()
-#     keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-#     reply_markup = InlineKeyboardMarkup(keyboard)
-#     await query.edit_message_text(
-#         "📌 Частые вопросы:\n"
-#         "- 📅 Можно ли перенести бронь?\n"
-#         "- ⚓ Какие условия аренды?\n"
-#         "- 👶 Есть ли ограничения по возрасту?\n"
-#         "🔙 Для возврата в меню нажмите кнопку .",
-#         reply_markup=reply_markup
-#     )
+
+async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    # список вопросов — см. выше
+    faq_items = [
+    "Какой маршрут",
+    "Где вы находитесь",
+    "Сколько человек помещается",
+    "Можно ли алкоголь",
+    "Хочу сделать предложение",
+    "Хочу подарить цветы",
+    "Я не умею управлять катером",
+    "Что делать в случае плохой погоды",
+    "Можно ли с детьми",
+    "Как отменить бронь",
+    "Как перенести бронь",
+    "Можно ли с домашними животными",
+    "Где увидеть цену",
+    "Можно ли сразу 2 или 3 катера",
+    "Можно ли арендовать для фотосессии",
+    "Сколько аренда по времени"
+    ]
+    keyboard = [[InlineKeyboardButton(q, callback_data=f"faq_{i}")]
+                for i, q in enumerate(faq_items)]
+    keyboard.append([InlineKeyboardButton("🏠 Назад в меню", callback_data="back_to_start")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text("📌 Выберите интересующий вопрос:", reply_markup=reply_markup)
+
 
 # async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     query = update.callback_query

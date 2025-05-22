@@ -241,7 +241,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [
                 [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
                 [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-                [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
+                [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
+                [InlineKeyboardButton("❓ Часто задаваемые вопросы", callback_data="faq")]
             ]
 
             await context.bot.send_photo(
