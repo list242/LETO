@@ -168,7 +168,9 @@ def get_weather_description(weather: dict) -> str:
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"[DEBUG] Callback received: {update.callback_query.data}")
     query = update.callback_query
-    
+    print("🔥 handle_message вызван")
+    print("🔘 data =", update.callback_query.data)
+
     if query:
         user_chat_id = update.effective_user.id
         admins = load_admins()
