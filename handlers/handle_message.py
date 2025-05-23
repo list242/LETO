@@ -387,7 +387,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 await query.answer("Это крайнее фото.")
                 return
-
             context.user_data[index_key] = current
 
             # ============ Формируем кнопки ============
