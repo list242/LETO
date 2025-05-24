@@ -1,5 +1,7 @@
 # bot.py
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+from handlers.handle_message import handle_message
+callback_handler = CallbackQueryHandler(handle_message)
 from handlers.button_handler import (
     start_handler, 
     # faq_handler, 
@@ -56,18 +58,23 @@ async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo = update.message.photo[-1]
         await update.message.reply_text(f"📎 File ID: {photo.file_id}")
 # Регистрация обработчиков
+# Приоритетные обработчики с фильтрами
 application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approve|reject)-\d+$"))
+application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
+application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$"))
+
+# Командные обработчики
+application.add_handler(CommandHandler("start_quiz", start_quiz))
+application.add_handler(CommandHandler("register", register_admin))
+
+# Обработчики сообщений
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_question))
+
+# Основной обработчик callback'ов (всех остальных!)
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
-application.add_handler(callback_handler)
-# application.add_handler(help_handler)
-application.add_handler(CommandHandler("register", register_admin))
-#application.add_handler(conv_handler)
-application.add_handler(CommandHandler("start_quiz", start_quiz))
-application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$"))
-application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
-# application.add_handler(callback_handler)  # <-- обязательно в самом конце
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_question))
+application.add_handler(callback_handler)  # ⬅️ ОБЯЗАТЕЛЬНО САМЫЙ ПОСЛЕДНИЙ
+
 if __name__ == "__main__":
     application.run_polling()
