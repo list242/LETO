@@ -60,6 +60,7 @@ application.add_handler(CallbackQueryHandler(handle_approval, pattern=r"^(approv
 application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
+application.add_handler(callback_handler)
 # application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
 #application.add_handler(conv_handler)
@@ -68,6 +69,5 @@ application.add_handler(CallbackQueryHandler(start_quiz, pattern="^start_quiz$")
 application.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_\d+_\d+$$"))
 # application.add_handler(callback_handler)  # <-- обязательно в самом конце
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_question))
-application.add_handler(callback_handler)
 if __name__ == "__main__":
     application.run_polling()
