@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta  # ✅ Добавили datetime и timedelta
 import calendar  # ✅ Добавили calendar
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from handlers.button_handler import ContextTypes, ConversationHandler  # ✅ Добавили ContextTypes и ConversationHandler
+from telegram.ext import ContextTypes, ConversationHandler
+  # ✅ Добавили ContextTypes и ConversationHandler
 from datetime import datetime
 import json
 import requests
