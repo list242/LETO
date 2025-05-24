@@ -6,7 +6,7 @@ from handlers.button_handler import (
     start_handler, 
     # faq_handler, 
     # help_handler,
-    callback_handler, boat_handler, register_admin, 
+    boat_handler, register_admin, 
     #conv_handler, 
     #cancel,
     start_quiz, handle_quiz_answer
