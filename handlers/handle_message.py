@@ -135,7 +135,7 @@ def get_weather_description(weather: dict) -> str:
     temp = weather.get("temp", "—")
     wind = weather.get("wind", "—")
     rain = weather.get("rain", False)
-
+    print("🔥 handle_message вызван")
     if temp == "—":
         temp_desc = "Температура: неизвестна 🌡"
     elif temp < 10:

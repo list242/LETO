@@ -4,11 +4,7 @@ from handlers.handle_message import handle_message
 callback_handler = CallbackQueryHandler(handle_message)
 from handlers.button_handler import (
     start_handler, 
-    # faq_handler, 
-    # help_handler,
     boat_handler, register_admin, 
-    #conv_handler, 
-    #cancel,
     start_quiz, handle_quiz_answer
 )
 from telegram import Update
@@ -75,6 +71,6 @@ application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_t
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
 application.add_handler(callback_handler)  # ⬅️ ОБЯЗАТЕЛЬНО САМЫЙ ПОСЛЕДНИЙ
-
+print("✅ Бот успешно запущен и polling начался")
 if __name__ == "__main__":
     application.run_polling()
