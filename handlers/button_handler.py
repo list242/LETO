@@ -63,6 +63,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if update.message:
+        await update.callback_query.message.delete()
         await update.message.reply_photo(
             photo=start_photo_file_id,
             caption="Добрый день, на связи cbrental🚩\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
@@ -207,6 +208,7 @@ async def send_quiz_question(update: Update, context: ContextTypes.DEFAULT_TYPE)
     keyboard = InlineKeyboardMarkup.from_row(buttons)
 
     if update.callback_query:
+        await update.callback_query.message.delete()
         await update.callback_query.edit_message_text(
             text=question_data["question"],
             reply_markup=keyboard
