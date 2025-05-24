@@ -6,7 +6,7 @@ import calendar
 #from handlers.handle_message import handle_message
 #from handlers.utils import generate_date_keyboard, notify_admin, MAX_DATE, enter_name, enter_phone, handle_message
 #from handlers.handle_message import handle_message  # ✅ Больше нет циклического импорта!
-from handlers.handle_message import handle_message
+
   # ✅ Правильный импорт 
 from bookings_storage import save_booking_to_file, delete_booking, get_booking, get_all_bookings
 from handlers.utils import load_admins, RUSSIAN_DAY_ABBREVIATIONS, ENTERING_NAME, ENTERING_PHONE, enter_name, enter_phone, get_taken_slots
@@ -290,8 +290,6 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
 start_handler = CommandHandler("start", start)
 # faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
 # help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
-#back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
-callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
 boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
 #approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")
