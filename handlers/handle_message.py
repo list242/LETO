@@ -476,17 +476,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"Вы выбрали лодку {boat}. Теперь выберите дату:",
                 reply_markup=reply_markup
             )
-        # elif data == "faq":
-        #         keyboard = [[InlineKeyboardButton("Назад", callback_data="back_to_start")]]
-        #         reply_markup = InlineKeyboardMarkup(keyboard)
-        #         await query.edit_message_text(
-        #             "📌 Частые вопросы:\n"
-        #             "- 📅 Можно ли перенести бронь?\n"
-        #             "- ⚓ Какие условия аренды?\n"
-        #             "- 👶 Есть ли ограничения по возрасту?\n"
-        #             "🔙 Для возврата в меню нажмите кнопку ниже.",
-        #             reply_markup=reply_markup
-        #         )
         elif data == "my_booking":
             booking = get_booking(user_chat_id)
             if not booking:
