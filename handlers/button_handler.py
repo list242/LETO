@@ -62,7 +62,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
         [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
+        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")],
+        [InlineKeyboardButton("❓ Ответы на вопросы", callback_data="faq")]
+
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -73,6 +75,34 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption="Добрый день, на связи cbrental🚩\n\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
         reply_markup=reply_markup
     )
+async def faq_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("Сколько аренда по времени", callback_data="faq_time")],
+        [InlineKeyboardButton("Можно ли с детьми", callback_data="faq_kids")],
+        [InlineKeyboardButton("Можно ли с животными", callback_data="faq_animals")],
+        [InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text("❓ Выберите вопрос:", reply_markup=reply_markup)
+async def faq_time_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    text = (
+        "Маршрут по акватории Серебряного Бора длится около 1 часа 30 минут.\n"
+        "Навигаторы на борту помогут вам ориентироваться."
+    )
+    keyboard = [
+        [InlineKeyboardButton("⬅️ Назад", callback_data="faq")],
+        [InlineKeyboardButton("🏠 В меню", callback_data="back_to_start")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(text, reply_markup=reply_markup)
 
 async def register_admin(update: Update, context):
     chat_id = update.message.chat_id
@@ -296,10 +326,13 @@ async def finish_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Экспортируем обработчик callback-запросов
 # Регистрация обработчиков
 start_handler = CommandHandler("start", start)
+faq_menu_handler = CallbackQueryHandler(faq_menu_handler, pattern="^faq$")
+faq_time_handler = CallbackQueryHandler(faq_time_handler, pattern="^faq_time$")
 # faq_handler = CallbackQueryHandler(faq_handler, pattern="^faq$")
 # help_handler = CallbackQueryHandler(help_handler, pattern="^help$")
 #back_handler = CallbackQueryHandler(start, pattern="^back_to_start$")
 callback_handler = CallbackQueryHandler(handle_message)
 callback_handler2 = CallbackQueryHandler(my_booking, pattern="^my_booking$")
 boat_handler = CallbackQueryHandler(choose_boat, pattern="^select_boat$")
+
 #approve_handler = CallbackQueryHandler(approve_booking, pattern="^approve-\\d+$")

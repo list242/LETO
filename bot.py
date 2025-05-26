@@ -7,7 +7,8 @@ from handlers.button_handler import (
     callback_handler, boat_handler, register_admin, 
     #conv_handler, 
     #cancel,
-    start_quiz, handle_quiz_answer
+    start_quiz, handle_quiz_answer,
+    faq_menu_handler, faq_time_handler
 )
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -62,6 +63,8 @@ application.add_handler(MessageHandler(filters.PHOTO, get_file_id))
 
 application.add_handler(start_handler)
 application.add_handler(boat_handler)
+application.add_handler(faq_menu_handler)
+application.add_handler(faq_time_handler)
 # application.add_handler(faq_handler)
 # application.add_handler(help_handler)
 application.add_handler(CommandHandler("register", register_admin))
