@@ -38,7 +38,6 @@ boat_photos = {
         "photos": ["AgACAgIAAxkBAAIJ_mgiUGcwDUaZrp-AFltDMoZrgmlgAAII7zEbgsIQSe7owVRTdxdvAQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ_GgiUGM2eU9j3JhmLNcuXNDSDs8FAAIH7zEbgsIQSdPzhY6HtFF-AQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ-mgiUF62Nood_-nB2l_Bh_j3jfAUAAIG7zEbgsIQScILOejghOD4AQADAgADeAADNgQ",
-                   "AgACAgIAAxkBAAIJ-GgiUFz5EncyEeUpmgiHfiZoZikGAAID7zEbgsIQSYUzXrXK97qIAQADAgADeAADNgQ",
                    "AgACAgIAAxkBAAIJ9mgiUFlzMDnE-YU-WoWFe3SVlWmiAAIC7zEbgsIQSblwoFwi98XSAQADAgADeAADNgQ"
                    ]
     }

@@ -1,4 +1,5 @@
 import json
+from telegram import InputMediaPhoto
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes, ConversationHandler, MessageHandler, filters
 from datetime import datetime, timedelta
@@ -45,12 +46,13 @@ def format_date(date):
 async def start(update: Update, context):
     user_name = update.message.from_user.first_name
     await update.message.reply_text(f"Привет, {user_name}! Я бот для бронирования лодок.")
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_chat_id = update.effective_user.id
-    # ❗ Проверка: если есть активный запрос (перенос, отмена, ожидание)
     admins = load_admins()
-    if user_chat_id not in admins and context.bot_data.get(f"pending-{user_chat_id}"):
 
+    if user_chat_id not in admins and context.bot_data.get(f"pending-{user_chat_id}"):
         if update.message:
             await update.message.reply_text("⏳ Ожидайте подтверждения от администратора.")
         elif update.callback_query:
@@ -58,21 +60,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     keyboard = [
-    [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
-    [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
-    [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
-    # [InlineKeyboardButton("ℹ️ Помощь", callback_data="help")],
-    # [InlineKeyboardButton("❓ Частые вопросы", callback_data="faq")],
+        [InlineKeyboardButton("🚤 Выбор лодки", callback_data="select_boat")],
+        [InlineKeyboardButton("📷 Фото лодок", callback_data="show_boat_photos")],
+        [InlineKeyboardButton("📘 Пройти инструктаж", callback_data="start_quiz")]
     ]
-
-
     reply_markup = InlineKeyboardMarkup(keyboard)
-    if update.message:
-        await update.message.reply_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
-    elif update.callback_query:
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text("👋 Добро пожаловать! Выберите один из пунктов ниже:", reply_markup=reply_markup)
+
+    # Отправка фотографии
+    await context.bot.send_photo(
+        chat_id=update.effective_chat.id,
+        photo="AgACAgIAAxkBAAILeGgvnC19UA1IsMjKaiV5O5dHGfy1AAKt7TEb-0-ASdJAcVd5KloXAQADAgADeQADNgQ",
+        caption="Добрый день, на связи cbrental🚩\n\nВыберите один из пунктов ниже, мы ответим на все ваши вопросы💫",
+        reply_markup=reply_markup
+    )
 
 async def register_admin(update: Update, context):
     chat_id = update.message.chat_id
